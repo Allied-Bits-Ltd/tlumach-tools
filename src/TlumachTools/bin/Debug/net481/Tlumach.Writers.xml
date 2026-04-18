@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Tlumach.Writers</name>
+    </assembly>
+    <members>
+        <member name="T:Tlumach.Writers.ArbWriter">
+            <summary>
+            A writer for the ARB (Application Resource Bundle) format.
+            </summary>
+        </member>
+        <member name="P:Tlumach.Writers.BaseJsonWriter.IndentationStep">
+            <summary>
+            Gets or sets the number of spaces to add for each level of indentation. The default value is 2.
+            </summary>
+        </member>
+        <member name="T:Tlumach.Writers.BaseWriter">
+            <summary>
+            The basic writer class for specialized format writers. It defines the basic methods that should be implemented by all writers.
+            </summary>
+        </member>
+        <member name="M:Tlumach.Writers.BaseWriter.WriteTranslations(Tlumach.TranslationManager,System.Collections.Generic.IReadOnlyCollection{System.Globalization.CultureInfo},System.IO.Stream)">
+            <summary>
+            Writes translations in the format that supports multiple languages in one file.
+            </summary>
+            <param name="translationManager">The translation translationManager from which the translations should be picked.</param>
+            <param name="cultures">The list of cultures to write.</param>
+            <param name="stream">The stream to write the resulting file to.</param>
+        </member>
+        <member name="M:Tlumach.Writers.BaseWriter.WriteTranslation(Tlumach.TranslationManager,System.Globalization.CultureInfo,System.IO.Stream)">
+            <summary>
+            Writes translations in the format that supports one language in one file.
+            </summary>
+            <param name="translationManager">The translation translationManager from which the translations should be picked.</param>
+            <param name="culture">The culture to write.<para>Set this parameter to <see cref="P:System.Globalization.CultureInfo.InvariantCulture"/> to signal that the default translation should be written.</para></param>
+            <param name="stream">The stream to write the resulting file to.</param>
+        </member>
+        <member name="M:Tlumach.Writers.BaseWriter.InternalWriteTranslations(Tlumach.TranslationManager,System.Collections.Generic.IReadOnlyCollection{System.Globalization.CultureInfo},System.IO.Stream)">
+            <summary>
+            Writes translations.
+            </summary>
+            <param name="translationManager">The translation translationManager from which the translations should be picked.</param>
+            <param name="cultures">The list of cultures to write.</param>
+            <param name="stream">The stream to write the resulting file to.</param>
+        </member>
+        <member name="M:Tlumach.Writers.BaseWriter.IsParentKey(System.String,System.String)">
+            <summary>
+            Determines if the specified key is a parent of the given potential child key.
+            </summary>
+            <param name="parentKey">The potential parent key.</param>
+            <param name="childKey">The potential child key.</param>
+            <returns>True if parentKey is a parent of childKey; otherwise, false.</returns>
+        </member>
+        <member name="M:Tlumach.Writers.BaseWriter.GetImmediateChild(System.String,System.String)">
+            <summary>
+            Gets the immediate child key from a parent and its descendant key.
+            </summary>
+            <param name="parentKey">The parent key.</param>
+            <param name="descendantKey">The descendant key (child, grandchild, etc.).</param>
+            <returns>The immediate child key name, or <see langword="null"/> if parentKey is not a parent of descendantKey.</returns>
+        </member>
+        <member name="T:Tlumach.Writers.CsvWriter">
+            <summary>
+            A writer for the CSV (comma-separated values) format.
+            </summary>
+        </member>
+        <member name="P:Tlumach.Writers.CsvWriter.SeparatorChar">
+            <summary>
+            Gets or sets the separator character used to separate values. Default is comma, but Excel uses semicolon ';' as a separator for exported CSVs.
+            </summary>
+        </member>
+        <member name="T:Tlumach.Writers.IniWriter">
+            <summary>
+            A writer for the simple INI format.
+            </summary>
+        </member>
+        <member name="T:Tlumach.Writers.JsonWriter">
+            <summary>
+            A writer for the basic Json format.
+            </summary>
+        </member>
+        <member name="T:Tlumach.Writers.ResxWriter">
+            <summary>
+            A writer for the .NET .resx XML format.
+            </summary>
+        </member>
+        <member name="T:Tlumach.Writers.TomlWriter">
+            <summary>
+            A writer for the TOML format.
+            </summary>
+        </member>
+        <member name="T:Tlumach.Writers.TsvWriter">
+            <summary>
+            A writer for the TSV (tab-separated values) format.
+            </summary>
+        </member>
+    </members>
+</doc>

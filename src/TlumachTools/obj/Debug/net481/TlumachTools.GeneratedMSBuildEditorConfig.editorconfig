@@ -1,0 +1,8 @@
+is_global = true
+build_property.RootNamespace = TlumachTools
+build_property.ProjectDir = C:\Projects\Tlumach\tlumach-tools\.claude\worktrees\nifty-tu-b79299\src\TlumachTools\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.CsWinRTUseWindowsUIXamlProjections = false
+build_property.EffectiveAnalysisLevelStyle = 
+build_property.EnableCodeStyleSeverity = 
