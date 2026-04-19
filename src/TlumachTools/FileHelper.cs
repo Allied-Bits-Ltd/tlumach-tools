@@ -25,22 +25,6 @@ namespace TlumachTools
     internal static class FileHelper
     {
         /// <summary>
-        /// Enables file reference recognition on all registered parsers.
-        /// This allows parsers to load entries with file references.
-        /// </summary>
-        public static void EnableFileReferenceRecognition()
-        {
-            JsonParser.RecognizeFileRefs = true;
-            ArbParser.RecognizeFileRefs = true;
-            IniParser.RecognizeFileRefs = true;
-            TomlParser.RecognizeFileRefs = true;
-            CsvParser.RecognizeFileRefs = true;
-            TsvParser.RecognizeFileRefs = true;
-            ResxParser.RecognizeFileRefs = true;
-            XliffParser.RecognizeFileRefs = true;
-        }
-
-        /// <summary>
         /// Resolves the full path for a file argument, relative to the current working directory.
         /// </summary>
         public static string Resolve(string filePath) =>
@@ -55,8 +39,8 @@ namespace TlumachTools
             error = null;
             string ext = Path.GetExtension(fullPath).ToLowerInvariant();
 
-            bool isConfig = FileFormats.GetConfigParser(ext) != null;
-            bool isTranslation = FileFormats.GetParser(ext) != null;
+            bool isConfig = FileFormats.GetConfigParser(ext) is not null;
+            bool isTranslation = FileFormats.GetParser(ext) is not null;
 
             if (isConfig)
                 return new ClassifiedFile(fullPath, FileKind.Config);
@@ -154,11 +138,11 @@ namespace TlumachTools
                 manager.LoadFromDisk = true;
 
                 CultureInfo? culture = GetCultureFromFileName(path);
-                if (culture == null)
+                if (culture is null)
                     culture = CultureInfo.InvariantCulture;
 
                 Translation? t = manager.LoadTranslation(culture);
-                if (t != null)
+                if (t is not null)
                     loaded.Add(culture);
             }
 
@@ -186,13 +170,14 @@ namespace TlumachTools
 
             if (overwrite)
             {
-                Console.WriteLine($"Overwriting '{outputPath}'.");
+                if (!quiet)
+                    Console.WriteLine($"Overwriting '{outputPath}'.");
                 return true;
             }
 
             if (quiet)
             {
-                Console.Error.WriteLine($"Skipping '{outputPath}': file already exists (use -overwrite to allow overwriting).");
+                // Console.Error.WriteLine($"Skipping '{outputPath}': file already exists (use -overwrite to allow overwriting).");
                 return false;
             }
 
@@ -234,7 +219,7 @@ namespace TlumachTools
                     return null;
                 }
 
-                if (Classify(sourceFullPath, out var classError) == null)
+                if (Classify(sourceFullPath, out var classError) is null)
                 {
                     error = $"Source file is not a valid translation file: '{sourceFile}'. {classError}";
                     return null;
@@ -249,7 +234,7 @@ namespace TlumachTools
 
                 if (File.Exists(sourceFullPath))
                 {
-                    if (Classify(sourceFullPath, out var classError) != null)
+                    if (Classify(sourceFullPath, out var classError) is not null)
                         return sourceFullPath;
                 }
             }
@@ -279,7 +264,7 @@ namespace TlumachTools
                 nameWithoutExt.Length - cultures[0].Name.Length - 1);
 
             string guessedSourcePath = Path.Combine(directory, baseNameWithoutLocale + ext);
-            if (File.Exists(guessedSourcePath) && Classify(guessedSourcePath, out _) != null)
+            if (File.Exists(guessedSourcePath) && Classify(guessedSourcePath, out _) is not null)
                 return guessedSourcePath;
 
             return string.Empty;

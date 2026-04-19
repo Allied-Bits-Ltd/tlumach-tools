@@ -51,7 +51,10 @@ namespace TlumachTools
         {
             var names = new List<string>();
             foreach (var w in _writers)
+            {
                 names.Add(w.FormatName);
+            }
+
             return string.Join(", ", names);
         }
     }

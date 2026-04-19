@@ -13,7 +13,7 @@ namespace TlumachTools.Commands
         public static int Run(string[] args)
         {
             ConvertArgs? parsed = ArgParser.ParseConvert(args, out string? error);
-            if (parsed == null)
+            if (parsed is null)
             {
                 Console.Error.WriteLine($"Error: {error}");
                 Console.Error.WriteLine();
@@ -22,12 +22,14 @@ namespace TlumachTools.Commands
             }
 
             if (parsed.KeepRefs)
-                FileHelper.EnableFileReferenceRecognition();
+                BaseParser.RecognizeFileRefs = true;
 
             BaseWriter? writer = WriterFactory.FindWriter(parsed.OutputFormat, out string? writerError);
-            if (writer == null)
+            if (writer is null)
             {
-                Console.Error.WriteLine($"Error: {writerError}");
+                if (!parsed.Quiet)
+                    Console.Error.WriteLine($"Error: {writerError}");
+
                 return 1;
             }
 
@@ -47,16 +49,22 @@ namespace TlumachTools.Commands
 
                 if (!File.Exists(fullPath))
                 {
-                    Console.Error.WriteLine($"File not found: '{fullPath}'");
+                    if (!parsed.Quiet)
+                        Console.Error.WriteLine($"File not found: '{fullPath}'");
+
                     missingResult = 2;
                     continue;
                 }
 
                 ClassifiedFile? classified = FileHelper.Classify(fullPath, out string? classifyError);
-                if (classified == null)
+                if (classified is null)
                 {
-                    Console.Error.WriteLine($"Cannot process '{file}': {classifyError}");
-                    if (missingResult == 0) missingResult = 1;
+                    if (!parsed.Quiet)
+                        Console.Error.WriteLine($"Cannot process '{file}': {classifyError}");
+
+                    if (missingResult == 0)
+                        missingResult = 1;
+
                     continue;
                 }
 
@@ -98,7 +106,8 @@ namespace TlumachTools.Commands
                         overallResult = r;
                 }
             }
-            else if (translationFiles.Count > 0)
+            else
+            if (translationFiles.Count > 0)
             {
                 // Translations were handled inside ConvertConfigFile; nothing more to do.
                 // (Each config file processes all provided translation files.)
@@ -120,19 +129,25 @@ namespace TlumachTools.Commands
             {
                 manager = FileHelper.LoadConfigFile(configFile.FullPath);
             }
-            catch (GenericParserException ex)
+            catch (TextParseException ex)
             {
-                Console.Error.WriteLine($"Parse error in '{configFile.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"File error with '{configFile.FullPath}' at {ex.LineNumber}:{ex.ColumnNumber} : {ex.Message}");
+
                 return 1;
             }
             catch (TlumachException ex)
             {
-                Console.Error.WriteLine($"Error loading '{configFile.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error loading '{configFile.FullPath}': {ex.Message}");
+
                 return 1;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Unexpected error loading '{configFile.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Unexpected error loading '{configFile.FullPath}': {ex.Message}");
+
                 return 1;
             }
 
@@ -183,17 +198,23 @@ namespace TlumachTools.Commands
             {
                 using FileStream stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
                 configWriter.WriteConfiguration(manager, stream);
-                Console.WriteLine($"Written configuration: '{outputPath}'");
+                if (!args.Quiet && args.Verbose)
+                    Console.WriteLine($"Written configuration: '{outputPath}'");
+
                 return 0;
             }
             catch (TlumachException ex)
             {
-                Console.Error.WriteLine($"Error writing config '{outputPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error writing config '{outputPath}': {ex.Message}");
+
                 return 1;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Unexpected error writing config '{outputPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Unexpected error writing config '{outputPath}': {ex.Message}");
+
                 return 1;
             }
         }
@@ -212,21 +233,32 @@ namespace TlumachTools.Commands
             manager.LoadFromDisk = true;
 
             CultureInfo? culture = FileHelper.GetCultureFromFileName(translationFile.FullPath);
-            if (culture == null)
+            if (culture is null)
                 culture = CultureInfo.InvariantCulture;
 
             try
             {
                 Translation? t = manager.LoadTranslation(culture);
-                if (t == null)
+                if (t is null)
                 {
-                    Console.Error.WriteLine($"Could not load translation from '{translationFile.FullPath}'.");
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"Could not load translation from '{translationFile.FullPath}'.");
+
                     return 1;
                 }
             }
+            catch (TextParseException ex)
+            {
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"File error with '{translationFile.FullPath}' at {ex.LineNumber}:{ex.ColumnNumber} : {ex.Message}");
+
+                return 1;
+            }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error loading translation '{translationFile.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error loading translation '{translationFile.FullPath}': {ex.Message}");
+
                 return 1;
             }
 
@@ -246,17 +278,23 @@ namespace TlumachTools.Commands
             }
             catch (GenericParserException ex)
             {
-                Console.Error.WriteLine($"Parse error in '{translationFile.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Parse error in '{translationFile.FullPath}': {ex.Message}");
+
                 return 1;
             }
             catch (TlumachException ex)
             {
-                Console.Error.WriteLine($"Error loading '{translationFile.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error loading '{translationFile.FullPath}': {ex.Message}");
+
                 return 1;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Unexpected error loading '{translationFile.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Unexpected error loading '{translationFile.FullPath}': {ex.Message}");
+
                 return 1;
             }
 
@@ -293,17 +331,22 @@ namespace TlumachTools.Commands
             {
                 using FileStream stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
                 writer.WriteTranslation(manager, culture, stream);
-                Console.WriteLine($"Written translation: '{outputPath}'");
+                if (!args.Quiet && args.Verbose)
+                    Console.WriteLine($"Written translation: '{outputPath}'");
                 return 0;
             }
             catch (TlumachException ex)
             {
-                Console.Error.WriteLine($"Error writing '{outputPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error writing '{outputPath}': {ex.Message}");
+
                 return 1;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Unexpected error writing '{outputPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Unexpected error writing '{outputPath}': {ex.Message}");
+
                 return 1;
             }
         }
@@ -323,16 +366,22 @@ namespace TlumachTools.Commands
 
                 if (!File.Exists(fullPath))
                 {
-                    Console.Error.WriteLine($"File not found: '{fullPath}'");
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"File not found: '{fullPath}'");
+
                     missingResult = 2;
                     continue;
                 }
 
                 ClassifiedFile? classified = FileHelper.Classify(fullPath, out string? classifyError);
-                if (classified == null)
+                if (classified is null)
                 {
-                    Console.Error.WriteLine($"Cannot process '{file}': {classifyError}");
-                    if (missingResult == 0) missingResult = 1;
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"Cannot process '{file}': {classifyError}");
+
+                    if (missingResult == 0)
+                        missingResult = 1;
+
                     continue;
                 }
 
@@ -392,7 +441,9 @@ namespace TlumachTools.Commands
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error loading config '{configFile.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error loading config '{configFile.FullPath}': {ex.Message}");
+
                 return 1;
             }
 
@@ -416,7 +467,7 @@ namespace TlumachTools.Commands
             ConvertArgs args)
         {
             string dir = Path.GetDirectoryName(translationFile.FullPath) ?? ".";
-            string configDefaultFile = manager.Configuration?.DefaultFile;
+            string? configDefaultFile = manager.DefaultConfiguration?.DefaultFile;
 
             string? sourceFile = FileHelper.ResolveXliffSourceFile(
                 translationFile.FullPath,
@@ -424,9 +475,11 @@ namespace TlumachTools.Commands
                 configDefaultFile,
                 out string? resolveError);
 
-            if (sourceFile == null)
+            if (sourceFile is null)
             {
-                Console.Error.WriteLine($"Error processing '{translationFile.FullPath}': {resolveError}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error processing '{translationFile.FullPath}': {resolveError}");
+
                 return 1;
             }
 
@@ -439,35 +492,57 @@ namespace TlumachTools.Commands
             try
             {
                 Translation? sourceTranslation = manager.LoadTranslation(CultureInfo.InvariantCulture);
-                if (sourceTranslation == null)
+                if (sourceTranslation is null)
                 {
-                    Console.Error.WriteLine($"Could not load source translation from '{sourceFile}'.");
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"Could not load source translation from '{sourceFile}'.");
+
                     return 1;
                 }
             }
+            catch (TextParseException ex)
+            {
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"File error with '{sourceFile}' at {ex.LineNumber}:{ex.ColumnNumber} : {ex.Message}");
+
+                return 1;
+            }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error loading source translation '{sourceFile}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error loading source translation '{sourceFile}': {ex.Message}");
+
                 return 1;
             }
 
             // Load target translation
             CultureInfo? targetCulture = FileHelper.GetCultureFromFileName(translationFile.FullPath);
-            if (targetCulture == null)
+            if (targetCulture is null)
                 targetCulture = CultureInfo.InvariantCulture;
 
             try
             {
                 Translation? targetTranslation = manager.LoadTranslation(targetCulture);
-                if (targetTranslation == null)
+                if (targetTranslation is null)
                 {
-                    Console.Error.WriteLine($"Could not load target translation from '{translationFile.FullPath}'.");
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"Could not load target translation from '{translationFile.FullPath}'.");
+
                     return 1;
                 }
             }
+            catch (TextParseException ex)
+            {
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"File error with '{translationFile.FullPath}' at {ex.LineNumber}:{ex.ColumnNumber} : {ex.Message}");
+
+                return 1;
+            }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error loading target translation '{translationFile.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error loading target translation '{translationFile.FullPath}': {ex.Message}");
+
                 return 1;
             }
 
@@ -487,9 +562,11 @@ namespace TlumachTools.Commands
                 null,
                 out string? resolveError);
 
-            if (sourceFile == null)
+            if (sourceFile is null)
             {
-                Console.Error.WriteLine($"Error processing '{translationFile.FullPath}': {resolveError}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error processing '{translationFile.FullPath}': {resolveError}");
+
                 return 1;
             }
 
@@ -499,9 +576,18 @@ namespace TlumachTools.Commands
             {
                 manager = FileHelper.CreateManagerForTranslationFile(translationFile.FullPath);
             }
+            catch (TextParseException ex)
+            {
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"File error with '{translationFile.FullPath}' at {ex.LineNumber}:{ex.ColumnNumber} : {ex.Message}");
+
+                return 1;
+            }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error loading '{translationFile.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error loading '{translationFile.FullPath}': {ex.Message}");
+
                 return 1;
             }
 
@@ -511,23 +597,36 @@ namespace TlumachTools.Commands
                 try
                 {
                     Translation? sourceTranslation = manager.LoadTranslation(CultureInfo.InvariantCulture);
-                    if (sourceTranslation == null)
+                    if (sourceTranslation is null)
                     {
-                        Console.Error.WriteLine($"Could not load source translation from '{sourceFile}'.");
+                        if (!args.Quiet)
+                            Console.Error.WriteLine($"Could not load source translation from '{sourceFile}'.");
+
                         return 1;
                     }
                 }
+                catch (TextParseException ex)
+                {
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"File error with '{sourceFile}' at {ex.LineNumber}:{ex.ColumnNumber} : {ex.Message}");
+
+                    return 1;
+                }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"Error loading source translation '{sourceFile}': {ex.Message}");
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"Error loading source translation '{sourceFile}': {ex.Message}");
+
                     return 1;
                 }
 
                 // Determine target culture from filename
                 CultureInfo? targetCulture = FileHelper.GetCultureFromFileName(translationFile.FullPath);
-                if (targetCulture == null)
+                if (targetCulture is null)
                 {
-                    Console.Error.WriteLine($"Cannot determine target culture from filename '{Path.GetFileName(translationFile.FullPath)}'.");
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"Cannot determine target culture from filename '{Path.GetFileName(translationFile.FullPath)}'.");
+
                     return 1;
                 }
 
@@ -535,15 +634,26 @@ namespace TlumachTools.Commands
                 try
                 {
                     Translation? targetTranslation = manager.LoadTranslation(targetCulture);
-                    if (targetTranslation == null)
+                    if (targetTranslation is null)
                     {
-                        Console.Error.WriteLine($"Could not load target translation from '{translationFile.FullPath}'.");
+                        if (!args.Quiet)
+                            Console.Error.WriteLine($"Could not load target translation from '{translationFile.FullPath}'.");
+
                         return 1;
                     }
                 }
+                catch (TextParseException ex)
+                {
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"File error with '{translationFile.FullPath}' at {ex.LineNumber}:{ex.ColumnNumber} : {ex.Message}");
+
+                    return 1;
+                }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"Error loading target translation '{translationFile.FullPath}': {ex.Message}");
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"Error loading target translation '{translationFile.FullPath}': {ex.Message}");
+
                     return 1;
                 }
 
@@ -572,17 +682,20 @@ namespace TlumachTools.Commands
 
                 using FileStream stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
                 xliffWriter.WriteTranslations(manager, new[] { targetCulture }, stream);
-                Console.WriteLine($"Written XLIFF translation: '{outputPath}'");
+                if (!args.Quiet && args.Verbose)
+                    Console.WriteLine($"Written XLIFF translation: '{outputPath}'");
                 return 0;
             }
             catch (TlumachException ex)
             {
-                Console.Error.WriteLine($"Error writing XLIFF '{outputPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error writing XLIFF '{outputPath}': {ex.Message}");
                 return 1;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Unexpected error writing XLIFF '{outputPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Unexpected error writing XLIFF '{outputPath}': {ex.Message}");
                 return 1;
             }
         }
@@ -594,7 +707,7 @@ namespace TlumachTools.Commands
             XliffWriter xliffWriter,
             ConvertArgs args)
         {
-            string configDefaultFile = manager.Configuration?.DefaultFile;
+            string? configDefaultFile = manager.DefaultConfiguration?.DefaultFile;
 
             string? sourceFile = FileHelper.ResolveXliffSourceFile(
                 inputPath,
@@ -602,9 +715,10 @@ namespace TlumachTools.Commands
                 configDefaultFile,
                 out string? resolveError);
 
-            if (sourceFile == null)
+            if (sourceFile is null)
             {
-                Console.Error.WriteLine($"Error processing '{inputPath}': {resolveError}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error processing '{inputPath}': {resolveError}");
                 return 1;
             }
 

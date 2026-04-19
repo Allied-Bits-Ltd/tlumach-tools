@@ -2,6 +2,8 @@
 
 TlumachTools is a command-line utility for managing, verifying, and converting translation and configuration files. It provides a unified interface for working with multiple file formats commonly used in localization workflows.
 
+The application uses the [Tlumach .NET](https://github.com/Allied-Bits-Ltd/tlumach-net), and both can be used together in localization activities.
+
 ## Purpose
 
 TlumachTools enables developers and translators to:
@@ -14,14 +16,14 @@ TlumachTools enables developers and translators to:
 
 TlumachTools works with the following file formats:
 
-- **JSON** (`.json`, `.jsoncfg`) - Configuration and translation files
-- **INI** (`.ini`, `.cfg`) - Configuration and translation files
-- **TOML** (`.toml`, `.tomlcfg`) - Configuration and translation files
-- **CSV** (`.csv`, `.cfg`) - Delimited translation data
-- **TSV** (`.tsv`, `.cfg`) - Tab-separated translation data
-- **RESX** (`.resx`, `.resxcfg`) - .NET resource files
-- **ARB** (`.arb`, `.arbcfg`) - Application Resource Bundle files
-- **XLIFF** (`.xliff`, `.xlf`) - XML Localization Interchange File Format 2.2
+- **JSON** (`.json`, `.jsoncfg`) - Translation and configuration files respectively, both in JSON format. 
+- **INI** (`.ini`, `.cfg`) -  Translation and configuration files respectively, both in key=value format. 
+- **TOML** (`.toml`, `.tomlcfg`) - Translation and configuration files respectively, both in TOML format. 
+- **CSV** (`.csv`, `.cfg`) - Translation and configuration files respectively. CSV translation files use comma as a separator by default but can use another separator if specified. Configuration is in the key=value format, the same as for INI format.
+- **TSV** (`.tsv`, `.cfg`) -  Translation and configuration files respectively. Translation files use Tab as a separator. Configuration is in the key=value format, the same as for INI format.
+- **RESX** (`.resx`, `.resxcfg` / `.xmlcfg`) - .NET resource files with configuration in XML format.
+- **ARB** (`.arb`, `.arbcfg`) - Application Resource Bundle files with configuration in JSON format.
+- **XLIFF** (`.xliff` / `.xlf`, `.xlfcfg` / `.xmlcfg`) - XML Localization Interchange File Format 2.2 with configuration in XML format.
 
 ### File Types
 
@@ -29,7 +31,7 @@ Each format supports two types of files:
 
 1. **Configuration Files** (`.cfg`, `.*cfg`): Define how to load and process translation files, including locale fallback chains, text processing modes, and file locations.
 
-2. **Translation Files** (`.json`, `.ini`, `.toml`, `.csv`, `.tsv`, `.resx`, `.arb`, `.xliff`): Contain the actual translation strings. Language variants are indicated by locale codes in filenames (e.g., `Strings_de-DE.json`, `Strings_fr.json`).
+2. **Translation Files** (`.json`, `.ini`, `.toml`, `.csv`, `.tsv`, `.resx`, `.arb`, `.xliff` / `.xlf`): Contain the actual translation strings. Language variants are indicated by locale codes in filenames (e.g., `Strings_de-DE.json`, `Strings_fr.json`).
 
 ## Installation
 
@@ -40,6 +42,8 @@ dotnet build src/TlumachTools/TlumachTools.sln
 ```
 
 The compiled executable will be located in the build output directory.
+
+A precompiled executable is also available.
 
 ## Usage
 
@@ -75,6 +79,8 @@ tlumach verify -in <file> [file ...] [options]
 |--------|-------|-------------|
 | `-in <file> [file ...]` | — | One or more input files (config or translation). Required. |
 | `-keeprefs` | `-r` | Recognize and resolve file references in entries. When enabled, entries with file references are verified to ensure the referenced files exist and can be resolved. |
+| `-quiet` | `-q` | Suppress all output including error messages. |
+| `-verbose` | `-q` | Produce informational output. |
 
 **Exit Codes:**
 
@@ -117,8 +123,9 @@ tlumach convert -in <file> [file ...] -out <format> [options]
 | `-in <file> [file ...]` | — | One or more input files (config or translation). Required. |
 | `-out <format>` | — | Output format: JSON, INI, TOML, CSV, TSV, RESX, ARB, or XLIFF. Required. |
 | `-overwrite` | `-y` | Overwrite existing output files without prompting. |
-| `-quiet` | `-q` | Suppress prompts; skip files that already exist (takes precedence over `-overwrite` for individual files). |
-| `-source <file>` | — | Source translation file for XLIFF output. Required for XLIFF conversion when automatic source resolution fails. Specify the base language file (typically the InvariantCulture translation). |
+| `-quiet` | `-q` | Suppress prompts; skip files that already exist unless `-overwrite` is also specified. Also, suppress all output including error messages. |
+| `-verbose` | `-q` | Produce informational output. |
+| `-source <file>` | — | Source translation file for XLIFF output. Required for XLIFF conversion when automatic source resolution fails. Specify the base language file. |
 | `-keeprefs` | `-r` | Recognize and resolve file references in entries. Ensures file references are valid during conversion. |
 
 **Exit Codes:**
@@ -164,7 +171,7 @@ tlumach convert -in strings.json -out INI -quiet
 
 File references allow translation entries to load values from external files instead of storing them inline. This is useful for:
 - Managing large strings separately
-- Handling binary or special format data
+- Handling special format data
 - Organizing translations by topic or function
 
 When `-keeprefs` is enabled during verify or convert:
@@ -176,9 +183,7 @@ When `-keeprefs` is enabled during verify or convert:
 Example entry with file reference:
 ```json
 {
-  "welcome_message": {
-    "ref": "messages/welcome.txt"
-  }
+  "welcome_message": "@messages/welcome.txt"
 }
 ```
 
@@ -242,16 +247,16 @@ Configuration files describe how to load translation files. They specify:
 **Example configuration (JSON):**
 ```json
 {
-  "translations": {
     "defaultFile": "Strings.json",
-    "locales": [
-      "de-DE",
-      "de",
-      "fr-FR",
-      "fr"
-    ],
-    "textProcessingMode": "DotNet"
-  }
+    "textProcessingMode": "DotNet",
+    "translations": {
+        "de-AT": "Strings_de-AT.json",
+        "de": "Strings_de.json",
+        "pl": "Strings_pl.json",
+        "sk": "Strings_sk.json",
+        "hr": "Strings_hr.json",
+        "*" : "Strings.json"
+    }
 }
 ```
 

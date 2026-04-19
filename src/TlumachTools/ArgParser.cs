@@ -10,6 +10,10 @@ namespace TlumachTools
     {
         public List<string> InputFiles { get; } = new List<string>();
         public bool KeepRefs { get; set; }
+
+        public bool Quiet { get; set; }
+
+        public bool Verbose { get; set; }
     }
 
     /// <summary>
@@ -23,6 +27,8 @@ namespace TlumachTools
         public bool Quiet { get; set; }
         public List<string> SourceFiles { get; } = new List<string>();
         public bool KeepRefs { get; set; }
+
+        public bool Verbose { get; set; }
     }
 
     internal static class ArgParser
@@ -42,14 +48,26 @@ namespace TlumachTools
         private static (string name, string? inlineValue) SplitOption(string arg)
         {
             string stripped;
-            if (arg.StartsWith("--", StringComparison.Ordinal))
-                stripped = arg.Substring(2);
-            else if (arg.StartsWith("-", StringComparison.Ordinal))
-                stripped = arg.Substring(1);
-            else if (arg.StartsWith("/", StringComparison.Ordinal))
-                stripped = arg.Substring(1);
+            if (arg.Length == 0)
+                stripped = string.Empty;
             else
-                stripped = arg;
+            {
+                switch (arg[0])
+                {
+                    case '-':
+                        if (arg.Length >= 2 && arg[1] == '-')
+                            stripped = arg.Substring(2);
+                        else
+                            stripped = arg.Substring(1);
+                        break;
+                    case '/':
+                        stripped = arg.Substring(1);
+                        break;
+                    default:
+                        stripped = arg;
+                        break;
+                }
+            }
 
             int eq = stripped.IndexOf('=');
             if (eq >= 0)
@@ -66,10 +84,11 @@ namespace TlumachTools
         {
             var values = new List<string>();
 
-            if (inlineValue != null)
+            if (inlineValue is not null)
             {
                 if (inlineValue.Length > 0)
                     values.Add(inlineValue);
+
                 return values;
             }
 
@@ -111,8 +130,32 @@ namespace TlumachTools
 
                     case "keeprefs":
                     case "r":
-                        CollectValues(args, ref i, inlineValue);
+                        if (CollectValues(args, ref i, inlineValue).Count > 0)
+                        {
+                            error = "Unexpected values provided for the -keeprefs option";
+                            return null;
+                        }
                         result.KeepRefs = true;
+                        break;
+
+                    case "quiet":
+                    case "q":
+                        if (CollectValues(args, ref i, inlineValue).Count > 0)
+                        {
+                            error = "Unexpected values provided for the -quiet option";
+                            return null;
+                        }
+                        result.Quiet = true;
+                        break;
+
+                    case "verbose":
+                    case "v":
+                        if (CollectValues(args, ref i, inlineValue).Count > 0)
+                        {
+                            error = "Unexpected values provided for the -verbose option";
+                            return null;
+                        }
+                        result.Verbose = true;
                         break;
 
                     default:
@@ -169,14 +212,34 @@ namespace TlumachTools
 
                     case "overwrite":
                     case "y":
-                        CollectValues(args, ref i, inlineValue);
+                        if (CollectValues(args, ref i, inlineValue).Count > 0)
+                        {
+                            error = "Unexpected values provided for the -overwrite option";
+                            return null;
+                        }
+
                         result.Overwrite = true;
                         break;
 
                     case "quiet":
                     case "q":
-                        CollectValues(args, ref i, inlineValue);
+                        if (CollectValues(args, ref i, inlineValue).Count > 0)
+                        {
+                            error = "Unexpected values provided for the -quiet option";
+                            return null;
+                        }
+
                         result.Quiet = true;
+                        break;
+
+                    case "verbose":
+                    case "v":
+                        if (CollectValues(args, ref i, inlineValue).Count > 0)
+                        {
+                            error = "Unexpected values provided for the -verbose option";
+                            return null;
+                        }
+                        result.Verbose = true;
                         break;
 
                     case "source":
@@ -191,7 +254,12 @@ namespace TlumachTools
 
                     case "keeprefs":
                     case "r":
-                        CollectValues(args, ref i, inlineValue);
+                        if (CollectValues(args, ref i, inlineValue).Count > 0)
+                        {
+                            error = "Unexpected values provided for the -keeprefs option";
+                            return null;
+                        }
+
                         result.KeepRefs = true;
                         break;
 

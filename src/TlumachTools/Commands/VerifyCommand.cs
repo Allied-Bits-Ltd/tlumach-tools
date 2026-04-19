@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Tlumach;
 using Tlumach.Base;
@@ -10,7 +11,7 @@ namespace TlumachTools.Commands
         public static int Run(string[] args)
         {
             VerifyArgs? parsed = ArgParser.ParseVerify(args, out string? error);
-            if (parsed == null)
+            if (parsed is null)
             {
                 Console.Error.WriteLine($"Error: {error}");
                 Console.Error.WriteLine();
@@ -19,7 +20,7 @@ namespace TlumachTools.Commands
             }
 
             if (parsed.KeepRefs)
-                FileHelper.EnableFileReferenceRecognition();
+                BaseParser.RecognizeFileRefs = true;
 
             int result = 0;
 
@@ -27,80 +28,143 @@ namespace TlumachTools.Commands
             {
                 string fullPath = FileHelper.Resolve(file);
 
-                if (!File.Exists(fullPath))
+                try
                 {
-                    Console.Error.WriteLine($"File not found: '{fullPath}'");
-                    result = 2;
-                    continue;
-                }
+                    if (!File.Exists(fullPath))
+                    {
+                        if (!parsed.Quiet)
+                            Console.Error.WriteLine($"File not found: '{fullPath}'");
+                        result = 2;
+                        continue;
+                    }
 
-                ClassifiedFile? classified = FileHelper.Classify(fullPath, out string? classifyError);
-                if (classified == null)
+                    ClassifiedFile? classified = FileHelper.Classify(fullPath, out string? classifyError);
+                    if (classified is null)
+                    {
+                        if (!parsed.Quiet)
+                            Console.Error.WriteLine($"Cannot process '{file}': {classifyError}");
+                        if (result == 0) result = 1;
+                        continue;
+                    }
+
+                    int fileResult = VerifyFile(classified, parsed.KeepRefs, parsed);
+                    if (fileResult != 0 && result == 0)
+                        result = fileResult;
+                }
+                catch (TlumachException ex)
                 {
-                    Console.Error.WriteLine($"Cannot process '{file}': {classifyError}");
-                    if (result == 0) result = 1;
-                    continue;
-                }
+                    if (!parsed.Quiet)
+                        Console.Error.WriteLine($"Error processing '{fullPath}': {ex.Message}");
 
-                int fileResult = VerifyFile(classified, parsed.KeepRefs);
-                if (fileResult != 0 && result == 0)
-                    result = fileResult;
+                    result = 1;
+                }
+                catch (Exception ex)
+                {
+                    if (!parsed.Quiet)
+                        Console.Error.WriteLine($"Unexpected error processing '{fullPath}': {ex.Message}");
+
+                    result = 1;
+                }
             }
 
-            if (result == 0)
+            if (result == 0 && !parsed.Quiet && parsed.Verbose)
                 Console.WriteLine("All files verified successfully.");
 
             return result;
         }
 
-        private static int VerifyFile(ClassifiedFile file, bool keepRefs)
+        private static int VerifyFile(ClassifiedFile file, bool keepRefs, VerifyArgs args)
         {
             try
             {
                 switch (file.Kind)
                 {
                     case FileKind.Config:
-                        return VerifyConfig(file.FullPath, keepRefs);
+                        return VerifyConfig(file.FullPath, keepRefs, args);
 
                     case FileKind.Translation:
-                        return VerifyTranslation(file.FullPath, keepRefs);
+                        return VerifyTranslation(file.FullPath, keepRefs, args);
 
                     default:
-                        Console.Error.WriteLine($"Unhandled file kind for '{file.FullPath}'.");
+                        if (!args.Quiet)
+                            Console.Error.WriteLine($"Unhandled file kind for '{file.FullPath}'.");
                         return 1;
                 }
             }
+            catch (FileNotFoundException ex)
+            {
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"File not found: '{file.FullPath}' ({ex.Message})");
+                return 2;
+            }
+            catch (TextParseException ex)
+            {
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"File error with '{file.FullPath}' at {ex.LineNumber}:{ex.ColumnNumber} : {ex.Message}");
+                return 1;
+            }
             catch (GenericParserException ex)
             {
-                Console.Error.WriteLine($"Parse error in '{file.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Parse error in '{file.FullPath}': {ex.Message}");
                 return 1;
             }
             catch (TlumachException ex)
             {
-                Console.Error.WriteLine($"Error loading '{file.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error loading '{file.FullPath}': {ex.Message}");
                 return 1;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Unexpected error with '{file.FullPath}': {ex.Message}");
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Unexpected error with '{file.FullPath}': {ex.Message}");
                 return 1;
             }
         }
 
-        private static int VerifyConfig(string fullPath, bool keepRefs)
+        private static int VerifyConfig(string fullPath, bool keepRefs, VerifyArgs args)
         {
             using TranslationManager manager = FileHelper.LoadConfigFile(fullPath);
-            Console.WriteLine($"OK (configuration): '{fullPath}'");
+            if (!args.Quiet && args.Verbose)
+                Console.WriteLine($"OK (configuration): '{fullPath}'");
+
             return 0;
         }
 
-        private static int VerifyTranslation(string fullPath, bool keepRefs)
+        private static int VerifyTranslation(string fullPath, bool keepRefs, VerifyArgs args)
         {
-            Translation? translation = FileHelper.LoadTranslationFile(fullPath);
-            if (translation == null)
+            Translation? translation = null;
+            try
             {
-                string ext = System.IO.Path.GetExtension(fullPath);
-                Console.Error.WriteLine($"No parser available for '{fullPath}' (extension '{ext}').");
+                translation = FileHelper.LoadTranslationFile(fullPath);
+                if (translation is null)
+                {
+                    string ext = System.IO.Path.GetExtension(fullPath);
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"No parser available for '{fullPath}' (extension '{ext}').");
+                    return 1;
+                }
+            }
+            catch (TextParseException ex)
+            {
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"File error with '{fullPath}' at {ex.LineNumber}:{ex.ColumnNumber} : {ex.Message}");
+
+                return 1;
+            }
+            catch (TlumachException ex)
+            {
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Error loading '{fullPath}': {ex.Message}");
+
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"Unexpected error loading '{fullPath}': {ex.Message}");
+
                 return 1;
             }
 
@@ -108,14 +172,15 @@ namespace TlumachTools.Commands
 
             if (keepRefs)
             {
-                result = ResolveFileReferences(fullPath, translation);
+                result = ResolveFileReferences(fullPath, translation, args);
             }
 
-            Console.WriteLine($"OK (translation, {translation.Count} entries): '{fullPath}'");
+            if (!args.Quiet && args.Verbose)
+                Console.WriteLine($"OK (translation, {translation.Count} entries): '{fullPath}'");
             return result;
         }
 
-        private static int ResolveFileReferences(string fullPath, Translation translation)
+        private static int ResolveFileReferences(string fullPath, Translation translation, VerifyArgs args)
         {
             var unresolved = new List<string>();
             var manager = FileHelper.CreateManagerForTranslationFile(fullPath);
@@ -123,21 +188,21 @@ namespace TlumachTools.Commands
             using (manager)
             {
                 // Subscribe to unresolved reference events to track them
-                manager.ReferenceNotResolved += (sender, e) => unresolved.Add(e.Key);
+                manager.OnReferenceNotResolved += (sender, e) => unresolved.Add(e.Key);
 
                 foreach (var entry in translation.Values)
                 {
                     // Skip entries that don't have file references
-                    if (entry.Reference == null || entry.Text != null)
+                    if (entry.Reference is null || entry.Text is not null)
                         continue;
 
                     try
                     {
-                        string? value = manager.GetValue(entry.Key);
-                        if (value == null)
+                        string? value = manager.GetValue(entry.Key).Text;
+                        /*if (value is null)
                         {
                             unresolved.Add(entry.Key);
-                        }
+                        }*/
                     }
                     catch (Exception)
                     {
@@ -148,10 +213,14 @@ namespace TlumachTools.Commands
 
             if (unresolved.Count > 0)
             {
-                Console.Error.WriteLine($"Unresolved file references in '{fullPath}':");
-                foreach (string key in unresolved)
+                if (!args.Quiet)
                 {
-                    Console.Error.WriteLine($"  - {key}");
+                    Console.Error.WriteLine($"Unresolved file references in '{fullPath}':");
+
+                    foreach (string key in unresolved)
+                    {
+                        Console.Error.WriteLine($"  - {key}");
+                    }
                 }
                 return 1;
             }
