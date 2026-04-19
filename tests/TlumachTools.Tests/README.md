@@ -1,11 +1,11 @@
-# TlumachTools Test Suite
+# Tlumach Tools Test Suite
 
-This directory contains the comprehensive test suite for the TlumachTools console application.
+This directory contains the comprehensive test suite for the Tlumach Tools console application.
 
 ## Test Structure
 
 ### Projects
-- **TlumachTools.Tests.csproj** - xUnit test project targeting net481
+- **TlumachTools.Tests.csproj** - xUnit test project targeting .NET Framework 4.8.1
 - References:  TlumachTools, Tlumach, Tlumach.Base, Tlumach.Writers
 
 ### Test Classes

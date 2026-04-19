@@ -1,12 +1,12 @@
-# TlumachTools
+# Tlumach Tools
 
-TlumachTools is a command-line utility for managing, verifying, and converting translation and configuration files. It provides a unified interface for working with multiple file formats commonly used in localization workflows.
+Tlumach Tools is a command-line utility for managing, verifying, and converting translation and configuration files. It provides a unified interface for working with multiple file formats commonly used in localization workflows.
 
 The application uses the [Tlumach .NET](https://github.com/Allied-Bits-Ltd/tlumach-net), and both can be used together in localization activities.
 
 ## Purpose
 
-TlumachTools enables developers and translators to:
+Tlumach Tools enables developers and translators to:
 - **Verify** that translation and configuration files are valid and can be loaded without errors
 - **Convert** translation files between different formats while preserving content and structure
 - **Resolve file references** in translation entries to ensure all referenced files exist
@@ -14,7 +14,7 @@ TlumachTools enables developers and translators to:
 
 ## Supported Formats
 
-TlumachTools works with the following file formats:
+Tlumach Tools works with the following file formats:
 
 - **JSON** (`.json`, `.jsoncfg`) - Translation and configuration files respectively, both in JSON format. 
 - **INI** (`.ini`, `.cfg`) -  Translation and configuration files respectively, both in key=value format. 
@@ -208,7 +208,7 @@ Example entry with file reference:
 
 ## XLIFF Support
 
-TlumachTools supports XLIFF 2.2 (XML Localization Interchange File Format), the industry standard for localization workflows.
+Tlumach Tools supports XLIFF 2.2 (XML Localization Interchange File Format), the industry standard for localization workflows.
 
 ### XLIFF Characteristics
 
@@ -218,7 +218,7 @@ TlumachTools supports XLIFF 2.2 (XML Localization Interchange File Format), the 
 
 ### Converting to XLIFF
 
-When converting to XLIFF format, TlumachTools requires:
+When converting to XLIFF format, Tlumach Tools requires:
 1. A **target translation** (the file being converted)
 2. A **source translation** (the base language file for comparison)
 
@@ -352,7 +352,7 @@ tlumach verify -in Strings.json Strings_de.json Strings_fr.json -keeprefs
 
 ## Integration with Other Tools
 
-TlumachTools is designed to work within broader localization workflows:
+Tlumach Tools is designed to work within broader localization workflows:
 
 - **Translation Management Systems (TMS)**: Export to XLIFF for professional translation tools
 - **CI/CD Pipelines**: Verify translations as part of build steps
