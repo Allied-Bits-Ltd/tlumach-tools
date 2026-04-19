@@ -15,18 +15,24 @@ namespace TlumachTools.Commands
             {
                 Console.Error.WriteLine($"Error: {error}");
                 Console.Error.WriteLine();
-                Console.Error.WriteLine("Usage: tlumach verify -in <file> [file ...] [-keeprefs]");
-                return 1;
+                Console.Error.WriteLine("Usage: tlumach verify -in <file> [file ...] [-quiet|-verbose] [-keeprefs] [-separator <char>]");
+                return 87;
             }
 
             if (parsed.KeepRefs)
                 BaseParser.RecognizeFileRefs = true;
+
+            if (parsed.Separator.HasValue)
+                CsvParser.SeparatorChar = parsed.Separator.Value;
 
             int result = 0;
 
             foreach (string file in parsed.InputFiles)
             {
                 string fullPath = FileHelper.Resolve(file);
+
+                if (!parsed.Quiet && parsed.Verbose)
+                    Console.WriteLine($"Verifying file: '{fullPath}'");
 
                 try
                 {

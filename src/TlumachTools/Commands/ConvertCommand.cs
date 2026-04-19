@@ -17,12 +17,15 @@ namespace TlumachTools.Commands
             {
                 Console.Error.WriteLine($"Error: {error}");
                 Console.Error.WriteLine();
-                Console.Error.WriteLine("Usage: tlumach convert -in <file> [file ...] -out <format> [-overwrite] [-quiet] [-source <file>] [-keeprefs]");
-                return 1;
+                Console.Error.WriteLine("Usage: tlumach convert -in <file> [file ...] -out <format> [-overwrite] [-quiet|-verbose] [-source <file>] [-keeprefs] [-separator <char>]");
+                return 87;
             }
 
             if (parsed.KeepRefs)
                 BaseParser.RecognizeFileRefs = true;
+
+            if (parsed.Separator.HasValue)
+                CsvParser.SeparatorChar = parsed.Separator.Value;
 
             BaseWriter? writer = WriterFactory.FindWriter(parsed.OutputFormat, out string? writerError);
             if (writer is null)
@@ -46,6 +49,9 @@ namespace TlumachTools.Commands
             foreach (string file in parsed.InputFiles)
             {
                 string fullPath = FileHelper.Resolve(file);
+
+                if (!parsed.Quiet && parsed.Verbose)
+                    Console.WriteLine($"Processing file: '{fullPath}'");
 
                 if (!File.Exists(fullPath))
                 {
@@ -194,12 +200,15 @@ namespace TlumachTools.Commands
             if (!FileHelper.ConfirmOverwrite(outputPath, args.Overwrite, args.Quiet))
                 return 1;
 
+            if (!args.Quiet && args.Verbose)
+                Console.WriteLine($"Saving configuration to: '{outputPath}'");
+
             try
             {
                 using FileStream stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
                 configWriter.WriteConfiguration(manager, stream);
                 if (!args.Quiet && args.Verbose)
-                    Console.WriteLine($"Written configuration: '{outputPath}'");
+                    Console.WriteLine($"Successfully written configuration: '{outputPath}'");
 
                 return 0;
             }
@@ -327,12 +336,15 @@ namespace TlumachTools.Commands
             if (!FileHelper.ConfirmOverwrite(outputPath, args.Overwrite, args.Quiet))
                 return 1;
 
+            if (!args.Quiet && args.Verbose)
+                Console.WriteLine($"Saving translation to: '{outputPath}'");
+
             try
             {
                 using FileStream stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
                 writer.WriteTranslation(manager, culture, stream);
                 if (!args.Quiet && args.Verbose)
-                    Console.WriteLine($"Written translation: '{outputPath}'");
+                    Console.WriteLine($"Successfully written translation: '{outputPath}'");
                 return 0;
             }
             catch (TlumachException ex)
@@ -363,6 +375,9 @@ namespace TlumachTools.Commands
             foreach (string file in args.InputFiles)
             {
                 string fullPath = FileHelper.Resolve(file);
+
+                if (!args.Quiet && args.Verbose)
+                    Console.WriteLine($"Processing XLIFF file: '{fullPath}'");
 
                 if (!File.Exists(fullPath))
                 {
@@ -674,6 +689,9 @@ namespace TlumachTools.Commands
             if (!FileHelper.ConfirmOverwrite(outputPath, args.Overwrite, args.Quiet))
                 return 1;
 
+            if (!args.Quiet && args.Verbose)
+                Console.WriteLine($"Saving XLIFF translation to: '{outputPath}'");
+
             try
             {
                 // Set XLIFF-specific metadata
@@ -683,7 +701,7 @@ namespace TlumachTools.Commands
                 using FileStream stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
                 xliffWriter.WriteTranslations(manager, new[] { targetCulture }, stream);
                 if (!args.Quiet && args.Verbose)
-                    Console.WriteLine($"Written XLIFF translation: '{outputPath}'");
+                    Console.WriteLine($"Successfully written XLIFF translation: '{outputPath}'");
                 return 0;
             }
             catch (TlumachException ex)

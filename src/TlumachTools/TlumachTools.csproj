@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <AssemblyName>TlumachTools</AssemblyName>
+    <AssemblyName>tlumach</AssemblyName>
     <RootNamespace>TlumachTools</RootNamespace>
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>

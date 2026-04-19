@@ -14,6 +14,8 @@ namespace TlumachTools
         public bool Quiet { get; set; }
 
         public bool Verbose { get; set; }
+
+        public char? Separator { get; set; }
     }
 
     /// <summary>
@@ -29,6 +31,8 @@ namespace TlumachTools
         public bool KeepRefs { get; set; }
 
         public bool Verbose { get; set; }
+
+        public char? Separator { get; set; }
     }
 
     internal static class ArgParser
@@ -158,6 +162,22 @@ namespace TlumachTools
                         result.Verbose = true;
                         break;
 
+                    case "separator":
+                    case "sep":
+                        var sepValues = CollectValues(args, ref i, inlineValue);
+                        if (sepValues.Count == 0)
+                        {
+                            error = "The -separator option requires a character value.";
+                            return null;
+                        }
+                        if (sepValues[0].Length != 1)
+                        {
+                            error = "The -separator option requires a single character.";
+                            return null;
+                        }
+                        result.Separator = sepValues[0][0];
+                        break;
+
                     default:
                         error = $"Unrecognized option '{args[i]}'.";
                         return null;
@@ -261,6 +281,22 @@ namespace TlumachTools
                         }
 
                         result.KeepRefs = true;
+                        break;
+
+                    case "separator":
+                    case "sep":
+                        var sepValues = CollectValues(args, ref i, inlineValue);
+                        if (sepValues.Count == 0)
+                        {
+                            error = "The -separator option requires a character value.";
+                            return null;
+                        }
+                        if (sepValues[0].Length != 1)
+                        {
+                            error = "The -separator option requires a single character.";
+                            return null;
+                        }
+                        result.Separator = sepValues[0][0];
                         break;
 
                     default:

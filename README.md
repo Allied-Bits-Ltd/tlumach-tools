@@ -19,7 +19,7 @@ TlumachTools works with the following file formats:
 - **JSON** (`.json`, `.jsoncfg`) - Translation and configuration files respectively, both in JSON format. 
 - **INI** (`.ini`, `.cfg`) -  Translation and configuration files respectively, both in key=value format. 
 - **TOML** (`.toml`, `.tomlcfg`) - Translation and configuration files respectively, both in TOML format. 
-- **CSV** (`.csv`, `.cfg`) - Translation and configuration files respectively. CSV translation files use comma as a separator by default but can use another separator if specified. Configuration is in the key=value format, the same as for INI format.
+- **CSV** (`.csv`, `.cfg`) - Translation and configuration files respectively. CSV translation files use comma (`,`) as a separator by default. Specify a custom separator using the `-separator` or `-sep` option (e.g., `-separator ";"` for semicolon-separated values). Configuration is in the key=value format, the same as for INI format.
 - **TSV** (`.tsv`, `.cfg`) -  Translation and configuration files respectively. Translation files use Tab as a separator. Configuration is in the key=value format, the same as for INI format.
 - **RESX** (`.resx`, `.resxcfg` / `.xmlcfg`) - .NET resource files with configuration in XML format.
 - **ARB** (`.arb`, `.arbcfg`) - Application Resource Bundle files with configuration in JSON format.
@@ -79,14 +79,16 @@ tlumach verify -in <file> [file ...] [options]
 |--------|-------|-------------|
 | `-in <file> [file ...]` | — | One or more input files (config or translation). Required. |
 | `-keeprefs` | `-r` | Recognize and resolve file references in entries. When enabled, entries with file references are verified to ensure the referenced files exist and can be resolved. |
+| `-separator <char>` | `-sep` | CSV separator character (default is comma). Used when processing CSV files. |
 | `-quiet` | `-q` | Suppress all output including error messages. |
-| `-verbose` | `-q` | Produce informational output. |
+| `-verbose` | `-v` | Produce informational output about the verification process. |
 
 **Exit Codes:**
 
 - `0` - All files verified successfully
 - `1` - Parse error or validation failure in one or more files
 - `2` - One or more input files not found
+- `87` -  One or more aguments to the tool are not valid
 
 **Examples:**
 
@@ -100,11 +102,17 @@ tlumach verify -in strings.json strings_de.json strings_fr.json
 # Verify with file reference resolution
 tlumach verify -in config.jsoncfg -keeprefs
 
+# Verify CSV file with custom separator
+tlumach verify -in translations.csv -separator ";"
+
 # Verify with double-dash syntax
 tlumach verify --in=config.jsoncfg
 
 # Verify with forward-slash syntax (Windows)
 tlumach verify /in config.jsoncfg /keeprefs
+
+# Verify with verbose output
+tlumach verify -in config.jsoncfg -verbose
 ```
 
 ### convert
@@ -124,7 +132,8 @@ tlumach convert -in <file> [file ...] -out <format> [options]
 | `-out <format>` | — | Output format: JSON, INI, TOML, CSV, TSV, RESX, ARB, or XLIFF. Required. |
 | `-overwrite` | `-y` | Overwrite existing output files without prompting. |
 | `-quiet` | `-q` | Suppress prompts; skip files that already exist unless `-overwrite` is also specified. Also, suppress all output including error messages. |
-| `-verbose` | `-q` | Produce informational output. |
+| `-verbose` | `-v` | Produce informational output about the conversion process. |
+| `-separator <char>` | `-sep` | CSV separator character (default is comma). Used when loading or converting CSV files. |
 | `-source <file>` | — | Source translation file for XLIFF output. Required for XLIFF conversion when automatic source resolution fails. Specify the base language file. |
 | `-keeprefs` | `-r` | Recognize and resolve file references in entries. Ensures file references are valid during conversion. |
 
@@ -133,6 +142,7 @@ tlumach convert -in <file> [file ...] -out <format> [options]
 - `0` - All files converted successfully
 - `1` - Parse error, validation failure, or conversion error
 - `2` - One or more input files not found
+- `87` -  One or more aguments to the tool are not valid
 
 **Output Files:**
 
@@ -163,8 +173,17 @@ tlumach convert -in strings_de.json -out XLIFF -source strings.json -overwrite
 # (looks for strings.json based on naming convention)
 tlumach convert -in strings_de.json -out XLIFF -overwrite
 
+# Convert CSV with custom separator to JSON
+tlumach convert -in translations.csv -out JSON -separator ";" -overwrite
+
+# Convert JSON to CSV with custom separator
+tlumach convert -in translations.json -out CSV -separator "|" -overwrite
+
 # Use quiet mode to skip existing files
 tlumach convert -in strings.json -out INI -quiet
+
+# Convert with verbose output to see processing details
+tlumach convert -in config.jsoncfg -out TOML -overwrite -verbose
 ```
 
 ## File References
@@ -260,11 +279,6 @@ Configuration files describe how to load translation files. They specify:
 }
 ```
 
-Configuration files enable:
-- Automatic loading of all locale variants
-- Proper fallback behavior when specific locales aren't available
-- Consistent processing of placeholder formats across multiple files
-
 ## Common Workflows
 
 ### Verify All Translation Files
@@ -312,6 +326,7 @@ tlumach verify -in Strings.json Strings_de.json Strings_fr.json -keeprefs
 | 0 | Success | All files processed without errors |
 | 1 | Error | Parse error, validation failure, or file format/conversion issue |
 | 2 | File Not Found | One or more input files could not be located |
+| 87 | Invalid Parameter | One or more aguments to the tool are not valid |
 
 ## Troubleshooting
 

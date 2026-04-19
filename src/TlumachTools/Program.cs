@@ -61,6 +61,7 @@ namespace TlumachTools
             Console.WriteLine("Options for 'verify':");
             Console.WriteLine("  -in <file> [file ...]    One or more input files (config or translation).");
             Console.WriteLine("  -keeprefs | -r           Recognize and resolve file references in entries.");
+            Console.WriteLine("  -separator | -sep <char> CSV separator character (default is comma).");
             Console.WriteLine();
             Console.WriteLine("Options for 'convert':");
             Console.WriteLine("  -in <file> [file ...]    One or more input files (config or translation).");
@@ -69,6 +70,7 @@ namespace TlumachTools
             Console.WriteLine("  -quiet | -q              Suppress prompts; skip files that already exist.");
             Console.WriteLine("  -source <file>           Source translation file for XLIFF output (required for XLIFF).");
             Console.WriteLine("  -keeprefs | -r           Recognize and resolve file references in entries.");
+            Console.WriteLine("  -separator | -sep <char> CSV separator character (default is comma).");
             Console.WriteLine();
             Console.WriteLine("Option prefixes --, -, and / are all accepted. Values may be joined with = (e.g. -out=JSON).");
             Console.WriteLine();
