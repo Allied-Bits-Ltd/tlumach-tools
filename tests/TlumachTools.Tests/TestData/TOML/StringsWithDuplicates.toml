@@ -1,0 +1,21 @@
+# ACos
+multiline_1 = """This is a multiline 
+description 1
+"""
+
+multiline_2 = """This is a multiline 
+description 2"""
+
+multiline_3 = """
+This is a multiline 
+description 3"""
+
+multiline_4 = """
+This is a multiline 
+description 4
+"""
+
+# some comment
+parameter_today_result = "Today date."
+some_other_param = ""
+multiline_1 = "XYZ"

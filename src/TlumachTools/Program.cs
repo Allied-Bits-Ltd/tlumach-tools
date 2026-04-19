@@ -47,6 +47,7 @@ namespace TlumachTools
             CsvParser.Use();
             TsvParser.Use();
             ResxParser.Use();
+            XliffParser.Use();
         }
 
         internal static void PrintUsage()
@@ -59,12 +60,15 @@ namespace TlumachTools
             Console.WriteLine();
             Console.WriteLine("Options for 'verify':");
             Console.WriteLine("  -in <file> [file ...]    One or more input files (config or translation).");
+            Console.WriteLine("  -keeprefs | -r           Recognize and resolve file references in entries.");
             Console.WriteLine();
             Console.WriteLine("Options for 'convert':");
             Console.WriteLine("  -in <file> [file ...]    One or more input files (config or translation).");
-            Console.WriteLine("  -out <format>            Output format (e.g. JSON, INI, TOML, CSV, TSV, RESX, ARB).");
+            Console.WriteLine("  -out <format>            Output format (e.g. JSON, INI, TOML, CSV, TSV, RESX, ARB, XLIFF).");
             Console.WriteLine("  -overwrite | -y          Overwrite existing output files without prompting.");
             Console.WriteLine("  -quiet | -q              Suppress prompts; skip files that already exist.");
+            Console.WriteLine("  -source <file>           Source translation file for XLIFF output (required for XLIFF).");
+            Console.WriteLine("  -keeprefs | -r           Recognize and resolve file references in entries.");
             Console.WriteLine();
             Console.WriteLine("Option prefixes --, -, and / are all accepted. Values may be joined with = (e.g. -out=JSON).");
             Console.WriteLine();

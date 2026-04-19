@@ -15,6 +15,7 @@ namespace TlumachTools
             new CsvWriter(),
             new TsvWriter(),
             new ResxWriter(),
+            new XliffWriter(),
         };
 
         /// <summary>

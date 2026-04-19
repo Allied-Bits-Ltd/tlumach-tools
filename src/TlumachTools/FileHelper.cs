@@ -25,6 +25,22 @@ namespace TlumachTools
     internal static class FileHelper
     {
         /// <summary>
+        /// Enables file reference recognition on all registered parsers.
+        /// This allows parsers to load entries with file references.
+        /// </summary>
+        public static void EnableFileReferenceRecognition()
+        {
+            JsonParser.RecognizeFileRefs = true;
+            ArbParser.RecognizeFileRefs = true;
+            IniParser.RecognizeFileRefs = true;
+            TomlParser.RecognizeFileRefs = true;
+            CsvParser.RecognizeFileRefs = true;
+            TsvParser.RecognizeFileRefs = true;
+            ResxParser.RecognizeFileRefs = true;
+            XliffParser.RecognizeFileRefs = true;
+        }
+
+        /// <summary>
         /// Resolves the full path for a file argument, relative to the current working directory.
         /// </summary>
         public static string Resolve(string filePath) =>
@@ -187,6 +203,86 @@ namespace TlumachTools
 
             Console.Error.WriteLine($"Skipping '{outputPath}'.");
             return false;
+        }
+
+        /// <summary>
+        /// Resolves the source translation file for XLIFF output using a three-tier strategy:
+        /// 1. Explicit source file (if provided)
+        /// 2. Config file's defaultFile (if config available)
+        /// 3. Naming convention fallback (strip locale suffix from target file)
+        /// Returns the full path and sets error message if resolution fails.
+        /// </summary>
+        public static string? ResolveXliffSourceFile(
+            string targetFilePath,
+            List<string> explicitSources,
+            string? configDefaultFile,
+            out string? error)
+        {
+            error = null;
+
+            string targetDir = Path.GetDirectoryName(targetFilePath) ?? ".";
+            string targetFile = Path.GetFileName(targetFilePath);
+
+            if (explicitSources.Count > 0)
+            {
+                string sourceFile = explicitSources[0];
+                string sourceFullPath = Resolve(sourceFile);
+
+                if (!File.Exists(sourceFullPath))
+                {
+                    error = $"Source file specified with -source not found: '{sourceFile}'";
+                    return null;
+                }
+
+                if (Classify(sourceFullPath, out var classError) == null)
+                {
+                    error = $"Source file is not a valid translation file: '{sourceFile}'. {classError}";
+                    return null;
+                }
+
+                return sourceFullPath;
+            }
+
+            if (!string.IsNullOrEmpty(configDefaultFile))
+            {
+                string sourceFullPath = Path.Combine(targetDir, configDefaultFile);
+
+                if (File.Exists(sourceFullPath))
+                {
+                    if (Classify(sourceFullPath, out var classError) != null)
+                        return sourceFullPath;
+                }
+            }
+
+            string sourceNameGuess = TryFindSourceByNamingConvention(targetDir, targetFile);
+            if (!string.IsNullOrEmpty(sourceNameGuess))
+                return sourceNameGuess;
+
+            error = $"Cannot resolve source translation for XLIFF output. Provide it using -source parameter.";
+            return null;
+        }
+
+        /// <summary>
+        /// Tries to find source file by stripping locale suffix from target filename.
+        /// Example: "Strings_de-AT.json" → looks for "Strings.json"
+        /// </summary>
+        private static string TryFindSourceByNamingConvention(string directory, string targetFilename)
+        {
+            string nameWithoutExt = Path.GetFileNameWithoutExtension(targetFilename);
+            string ext = Path.GetExtension(targetFilename);
+
+            var cultures = TranslationManager.ListCultures(new List<string> { targetFilename });
+            if (cultures.Count == 0)
+                return string.Empty;
+
+            string baseNameWithoutLocale = nameWithoutExt.Substring(0,
+                nameWithoutExt.Length - cultures[0].Name.Length - 1);
+
+            string guessedSourcePath = Path.Combine(directory, baseNameWithoutLocale + ext);
+            if (File.Exists(guessedSourcePath) && Classify(guessedSourcePath, out _) != null)
+                return guessedSourcePath;
+
+            return string.Empty;
         }
     }
 }

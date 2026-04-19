@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "dgSpecHash": "cOTTV/pP3jQ=",
+  "success": true,
+  "projectFilePath": "C:\\Projects\\Tlumach\\tlumach-tools\\.claude\\worktrees\\nifty-tu-b79299\\tests\\TlumachTools.Tests\\TlumachTools.Tests.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Eugene\\.nuget\\packages\\microsoft.codecoverage\\17.10.0\\microsoft.codecoverage.17.10.0.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\microsoft.net.test.sdk\\17.10.0\\microsoft.net.test.sdk.17.10.0.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\microsoft.testplatform.objectmodel\\17.8.0\\microsoft.testplatform.objectmodel.17.8.0.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\nuget.frameworks\\6.5.0\\nuget.frameworks.6.5.0.nupkg.sha512",
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.collections.immutable\\1.5.0\\system.collections.immutable.1.5.0.nupkg.sha512",
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.reflection.metadata\\1.6.0\\system.reflection.metadata.1.6.0.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\xunit\\2.9.0\\xunit.2.9.0.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\xunit.abstractions\\2.0.3\\xunit.abstractions.2.0.3.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\xunit.analyzers\\1.15.0\\xunit.analyzers.1.15.0.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\xunit.assert\\2.9.0\\xunit.assert.2.9.0.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\xunit.core\\2.9.0\\xunit.core.2.9.0.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\xunit.extensibility.core\\2.9.0\\xunit.extensibility.core.2.9.0.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\xunit.extensibility.execution\\2.9.0\\xunit.extensibility.execution.2.9.0.nupkg.sha512",
+    "C:\\Users\\Eugene\\.nuget\\packages\\xunit.runner.visualstudio\\2.5.6\\xunit.runner.visualstudio.2.5.6.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "TlumachTools.Tests depends on Microsoft.NET.Test.Sdk (>= 17.9.1) but Microsoft.NET.Test.Sdk 17.9.1 was not found. Microsoft.NET.Test.Sdk 17.10.0 was resolved instead.",
+      "projectPath": "C:\\Projects\\Tlumach\\tlumach-tools\\.claude\\worktrees\\nifty-tu-b79299\\tests\\TlumachTools.Tests\\TlumachTools.Tests.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Projects\\Tlumach\\tlumach-tools\\.claude\\worktrees\\nifty-tu-b79299\\tests\\TlumachTools.Tests\\TlumachTools.Tests.csproj",
+      "libraryId": "Microsoft.NET.Test.Sdk",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.8.1"
+      ]
+    }
+  ]
+}

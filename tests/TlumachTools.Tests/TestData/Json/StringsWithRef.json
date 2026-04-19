@@ -1,0 +1,9 @@
+{
+    "hello": "Hello",
+    "ui": { 
+        "greeting" : "Welcome"    
+    },
+    "logs.server": {
+        "started" : "@ref.txt" 
+    }
+}

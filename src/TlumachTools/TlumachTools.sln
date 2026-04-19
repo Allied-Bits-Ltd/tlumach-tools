@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11709.299 stable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TlumachTools", "TlumachTools.csproj", "{B6341BD8-0F22-0E5D-54BC-96A71DB50649}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Base", "..\..\..\tlumach-net\src\Tlumach.Base\Tlumach.Base.csproj", "{F0746F01-184C-3EA2-05CB-828360E55AD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach", "..\..\..\tlumach-net\src\Tlumach\Tlumach.csproj", "{412A29F8-2D06-5C16-BF4E-2A72BDDC90C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tlumach.Writers", "..\..\..\tlumach-net\src\Tlumach.Writers\Tlumach.Writers.csproj", "{853B9DA4-1EE2-6F23-9F89-188B75B40176}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B6341BD8-0F22-0E5D-54BC-96A71DB50649}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6341BD8-0F22-0E5D-54BC-96A71DB50649}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6341BD8-0F22-0E5D-54BC-96A71DB50649}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6341BD8-0F22-0E5D-54BC-96A71DB50649}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0746F01-184C-3EA2-05CB-828360E55AD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0746F01-184C-3EA2-05CB-828360E55AD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0746F01-184C-3EA2-05CB-828360E55AD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0746F01-184C-3EA2-05CB-828360E55AD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{412A29F8-2D06-5C16-BF4E-2A72BDDC90C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{412A29F8-2D06-5C16-BF4E-2A72BDDC90C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{412A29F8-2D06-5C16-BF4E-2A72BDDC90C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{412A29F8-2D06-5C16-BF4E-2A72BDDC90C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{853B9DA4-1EE2-6F23-9F89-188B75B40176}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{853B9DA4-1EE2-6F23-9F89-188B75B40176}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{853B9DA4-1EE2-6F23-9F89-188B75B40176}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{853B9DA4-1EE2-6F23-9F89-188B75B40176}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3A65BFA7-459D-4523-A34F-6119DC8080F5}
+	EndGlobalSection
+EndGlobal

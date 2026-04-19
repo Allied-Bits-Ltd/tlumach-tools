@@ -1,0 +1,7 @@
+{
+    "@@locale": "de-DE",
+    "@@context": "Test fileset",
+    "Hello": "Hallo",
+    "Welcome" : "Willkommen",
+	"Bye" : "Tschüss"
+}

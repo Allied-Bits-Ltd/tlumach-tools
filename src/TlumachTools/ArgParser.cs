@@ -9,6 +9,7 @@ namespace TlumachTools
     internal sealed class VerifyArgs
     {
         public List<string> InputFiles { get; } = new List<string>();
+        public bool KeepRefs { get; set; }
     }
 
     /// <summary>
@@ -20,6 +21,8 @@ namespace TlumachTools
         public string OutputFormat { get; set; } = string.Empty;
         public bool Overwrite { get; set; }
         public bool Quiet { get; set; }
+        public List<string> SourceFiles { get; } = new List<string>();
+        public bool KeepRefs { get; set; }
     }
 
     internal static class ArgParser
@@ -106,6 +109,12 @@ namespace TlumachTools
                         result.InputFiles.AddRange(files);
                         break;
 
+                    case "keeprefs":
+                    case "r":
+                        CollectValues(args, ref i, inlineValue);
+                        result.KeepRefs = true;
+                        break;
+
                     default:
                         error = $"Unrecognized option '{args[i]}'.";
                         return null;
@@ -168,6 +177,22 @@ namespace TlumachTools
                     case "q":
                         CollectValues(args, ref i, inlineValue);
                         result.Quiet = true;
+                        break;
+
+                    case "source":
+                        var sourceFiles = CollectValues(args, ref i, inlineValue);
+                        if (sourceFiles.Count == 0)
+                        {
+                            error = "The -source option requires at least one file argument.";
+                            return null;
+                        }
+                        result.SourceFiles.AddRange(sourceFiles);
+                        break;
+
+                    case "keeprefs":
+                    case "r":
+                        CollectValues(args, ref i, inlineValue);
+                        result.KeepRefs = true;
                         break;
 
                     default:
