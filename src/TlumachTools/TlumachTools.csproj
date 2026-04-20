@@ -12,9 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\tlumach-net\src\Tlumach\Tlumach.csproj" />
-    <ProjectReference Include="..\..\..\tlumach-net\src\Tlumach.Base\Tlumach.Base.csproj" />
-    <ProjectReference Include="..\..\..\tlumach-net\src\Tlumach.Writers\Tlumach.Writers.csproj" />
+    <PackageReference Include="AlliedBits.Tlumach" Version="1.5.0" />
+    <PackageReference Include="AlliedBits.Tlumach.Writers" Version="1.5.0" />
   </ItemGroup>
 
 </Project>
