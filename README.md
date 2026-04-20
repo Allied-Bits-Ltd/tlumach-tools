@@ -2,7 +2,7 @@
 
 Tlumach Tools is a command-line utility for managing, verifying, and converting translation and configuration files. It provides a unified interface for working with multiple file formats commonly used in localization workflows.
 
-The application uses the [Tlumach .NET](https://github.com/Allied-Bits-Ltd/tlumach-net), and both can be used together in localization activities.
+The application uses the [Tlumach .NET](https://github.com/Allied-Bits-Ltd/tlumach-net) library, and both can be used together in localization activities.
 
 ## Purpose
 
