@@ -2,18 +2,26 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net481</TargetFramework>
+    <TargetFrameworks>net481;net10.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <AssemblyName>tlumach</AssemblyName>
+    <AssemblyName>TlumachTools</AssemblyName>
     <RootNamespace>TlumachTools</RootNamespace>
     <Platforms>AnyCPU</Platforms>
+    <Version>1.6.0</Version>
+    <FileVersion>1.6.0</FileVersion>
+    <AssemblyVersion>1.6.0</AssemblyVersion>
+    <AssemblyTitle>TlumachTools</AssemblyTitle>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AlliedBits.Tlumach" Version="1.5.0" />
-    <PackageReference Include="AlliedBits.Tlumach.Writers" Version="1.5.0" />
+    <PackageReference Include="AlliedBits.Tlumach" Version="1.*" />
+    <PackageReference Include="AlliedBits.Tlumach.Writers" Version="1.*" />
   </ItemGroup>
-
+  <Target Name="RemoveUnwantedTlumachAssets" AfterTargets="ResolveAssemblyReferences" Condition="'$(TargetFramework)' == 'net10.0'">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Tlumach.Avalonia'&#xD;&#xA;                Or '%(Filename)' == 'Tlumach.Extensions.Localization'" />
+    </ItemGroup>
+  </Target>
 </Project>

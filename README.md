@@ -24,6 +24,7 @@ Tlumach Tools works with the following file formats:
 - **RESX** (`.resx`, `.resxcfg` / `.xmlcfg`) - .NET resource files with configuration in XML format.
 - **ARB** (`.arb`, `.arbcfg`) - Application Resource Bundle files with configuration in JSON format.
 - **XLIFF** (`.xliff` / `.xlf`, `.xlfcfg` / `.xmlcfg`) - XML Localization Interchange File Format 2.2 with configuration in XML format.
+- **String Catalog** (`.xcstrings`, `.jsoncfg`) - Apple String Catalog.
 
 ### File Types
 
@@ -31,7 +32,7 @@ Each format supports two types of files:
 
 1. **Configuration Files** (`.cfg`, `.*cfg`): Define how to load and process translation files, including locale fallback chains, text processing modes, and file locations.
 
-2. **Translation Files** (`.json`, `.ini`, `.toml`, `.csv`, `.tsv`, `.resx`, `.arb`, `.xliff` / `.xlf`): Contain the actual translation strings. Language variants are indicated by locale codes in filenames (e.g., `Strings_de-DE.json`, `Strings_fr.json`).
+2. **Translation Files** (`.json`, `.ini`, `.toml`, `.csv`, `.tsv`, `.resx`, `.arb`, `.xliff` / `.xlf`, `.xcstrings`): Contain the actual translation strings. Language variants are indicated by locale codes in filenames (e.g., `Strings_de-DE.json`, `Strings_fr.json`).
 
 ## Installation
 
@@ -41,9 +42,9 @@ Build the project using .NET:
 dotnet build src/TlumachTools/TlumachTools.sln
 ```
 
-The compiled executable will be located in the build output directory.
+The compiled executables will be located in the build output directory.
 
-A precompiled executable is also available.
+Precompiled executables are also available.
 
 ## Usage
 
