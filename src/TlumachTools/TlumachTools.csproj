@@ -9,15 +9,28 @@
     <AssemblyName>TlumachTools</AssemblyName>
     <RootNamespace>TlumachTools</RootNamespace>
     <Platforms>AnyCPU</Platforms>
-    <Version>1.6.0</Version>
-    <FileVersion>1.6.0</FileVersion>
-    <AssemblyVersion>1.6.0</AssemblyVersion>
     <AssemblyTitle>TlumachTools</AssemblyTitle>
   </PropertyGroup>
 
+  <!-- The versions are taken from Directory.Build.props of Tlumach.NET, which is expected next to this repository;
+       a version given on the command line (/p:Version=...) takes precedence -->
+  <PropertyGroup>
+    <TlumachNetPropsFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\..\tlumach-net\Directory.Build.props'))</TlumachNetPropsFile>
+    <TlumachNetVersion Condition="Exists('$(TlumachNetPropsFile)')">$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(TlumachNetPropsFile)')), '(?&lt;=&lt;Version&gt;)[^&lt;]+').Value.Trim())</TlumachNetVersion>
+    <TlumachNetFileVersion Condition="Exists('$(TlumachNetPropsFile)')">$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(TlumachNetPropsFile)')), '(?&lt;=&lt;FileVersion&gt;)[^&lt;]+').Value.Trim())</TlumachNetFileVersion>
+    <TlumachNetAssemblyVersion Condition="Exists('$(TlumachNetPropsFile)')">$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(TlumachNetPropsFile)')), '(?&lt;=&lt;AssemblyVersion&gt;)[^&lt;]+').Value.Trim())</TlumachNetAssemblyVersion>
+    <TlumachVersionGiven Condition="'$(Version)' != ''">true</TlumachVersionGiven>
+    <Version Condition="'$(Version)' == ''">$(TlumachNetVersion)</Version>
+    <FileVersion Condition="'$(FileVersion)' == '' And '$(TlumachVersionGiven)' != 'true'">$(TlumachNetFileVersion)</FileVersion>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == '' And '$(TlumachVersionGiven)' != 'true'">$(TlumachNetAssemblyVersion)</AssemblyVersion>
+  </PropertyGroup>
+  <Target Name="CheckTlumachNetVersion" BeforeTargets="PrepareForBuild" Condition="'$(TlumachNetVersion)' == '' And '$(TlumachVersionGiven)' != 'true'">
+    <Error Text="Could not read the version from $(TlumachNetPropsFile). Check out Tlumach.NET next to this repository or set the version with /p:Version=..." />
+  </Target>
+
   <ItemGroup>
-    <PackageReference Include="AlliedBits.Tlumach" Version="1.*" />
-    <PackageReference Include="AlliedBits.Tlumach.Writers" Version="1.*" />
+    <PackageReference Include="AlliedBits.Tlumach" Version="2.*" />
+    <PackageReference Include="AlliedBits.Tlumach.Writers" Version="2.*" />
   </ItemGroup>
   <Target Name="RemoveUnwantedTlumachAssets" AfterTargets="ResolveAssemblyReferences" Condition="'$(TargetFramework)' == 'net10.0'">
     <ItemGroup>
