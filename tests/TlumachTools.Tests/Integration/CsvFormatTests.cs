@@ -32,6 +32,22 @@ namespace TlumachTools.Tests.Integration
         }
 
         [Fact]
+        public void VerifyCsvTranslationChecksEveryLocale()
+        {
+            // A CSV file holds a translation per locale column, and each of them is loaded
+            string path = Path.Combine(_tempDir, "locales.csv");
+            File.WriteAllText(path, "key,en,de,Description\nHello,Hello,Hallo,A greeting\nBye,Bye,Tschüss,\n");
+
+            (int exitCode, string stdout, string stderr) =
+                CommandLineTestHelper.RunTlumachTools("verify", "-in", path, "-verbose");
+
+            Assert.Equal(0, exitCode);
+            Assert.Empty(stderr);
+            Assert.Contains("for the locale 'en', 2 entries", stdout);
+            Assert.Contains("for the locale 'de', 2 entries", stdout);
+        }
+
+        [Fact]
         public void VerifyInvalidCsvTranslationFailsWithExit1()
         {
             string translationPath = CreateInvalidCsvTranslation();

@@ -48,6 +48,7 @@ namespace TlumachTools
             TsvParser.Use();
             ResxParser.Use();
             XliffParser.Use();
+            StringCatParser.Use();
         }
 
         internal static void PrintUsage()
@@ -62,6 +63,8 @@ namespace TlumachTools
             Console.WriteLine("  -in <file> [file ...]    One or more input files (config or translation).");
             Console.WriteLine("  -keeprefs | -r           Recognize and resolve file references in entries.");
             Console.WriteLine("  -separator | -sep <char> CSV separator character (default is comma).");
+            Console.WriteLine("  -help | -h               Show this help.");
+            Console.WriteLine("  A CSV or TSV file is verified for each of the locales in its first line.");
             Console.WriteLine();
             Console.WriteLine("Options for 'convert':");
             Console.WriteLine("  -in <file> [file ...]    One or more input files (config or translation).");

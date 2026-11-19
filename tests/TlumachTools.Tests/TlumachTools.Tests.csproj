@@ -19,9 +19,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TlumachTools\TlumachTools.csproj" />
-    <ProjectReference Include="..\..\..\..\tlumach-net\src\Tlumach\Tlumach.csproj" />
-    <ProjectReference Include="..\..\..\..\tlumach-net\src\Tlumach.Base\Tlumach.Base.csproj" />
-    <ProjectReference Include="..\..\..\..\tlumach-net\src\Tlumach.Writers\Tlumach.Writers.csproj" />
+    <ProjectReference Include="..\..\..\tlumach-net\src\Tlumach\Tlumach.csproj" />
+    <ProjectReference Include="..\..\..\tlumach-net\src\Tlumach.Base\Tlumach.Base.csproj" />
+    <ProjectReference Include="..\..\..\tlumach-net\src\Tlumach.Writers\Tlumach.Writers.csproj" />
   </ItemGroup>
 
 </Project>

@@ -19,6 +19,12 @@ namespace TlumachTools.Commands
                 return 87;
             }
 
+            if (parsed.Help)
+            {
+                Program.PrintUsage();
+                return 0;
+            }
+
             if (parsed.KeepRefs)
                 BaseParser.RecognizeFileRefs = true;
 
@@ -140,17 +146,18 @@ namespace TlumachTools.Commands
 
         private static int VerifyTranslation(string fullPath, bool keepRefs, VerifyArgs args)
         {
-            Translation? translation = null;
+            List<(string? Locale, Translation? Translation)> translations;
             try
             {
-                translation = FileHelper.LoadTranslationFile(fullPath);
-                if (translation is null)
+                if (FileFormats.GetParser(Path.GetExtension(fullPath).ToLowerInvariant()) is null)
                 {
-                    string ext = System.IO.Path.GetExtension(fullPath);
                     if (!args.Quiet)
-                        Console.Error.WriteLine($"No parser available for '{fullPath}' (extension '{ext}').");
+                        Console.Error.WriteLine($"No parser available for '{fullPath}' (extension '{Path.GetExtension(fullPath)}').");
                     return 1;
                 }
+
+                // A CSV or TSV file holds one translation per locale column; each of them is loaded
+                translations = FileHelper.LoadTranslationsOfAllLocales(fullPath);
             }
             catch (TextParseException ex)
             {
@@ -176,13 +183,29 @@ namespace TlumachTools.Commands
 
             int result = 0;
 
-            if (keepRefs)
+            foreach ((string? locale, Translation? translation) in translations)
             {
-                result = ResolveFileReferences(fullPath, translation, args);
+                string forLocale = locale is null ? string.Empty : $" for the locale '{locale}'";
+
+                if (translation is null)
+                {
+                    if (!args.Quiet)
+                        Console.Error.WriteLine($"The file '{fullPath}' contains no translation{forLocale}.");
+                    result = 1;
+                    continue;
+                }
+
+                if (keepRefs)
+                {
+                    int refsResult = ResolveFileReferences(fullPath, translation, args);
+                    if (refsResult != 0)
+                        result = refsResult;
+                }
+
+                if (!args.Quiet && args.Verbose)
+                    Console.WriteLine($"OK (translation{forLocale}, {translation.Count} entries): '{fullPath}'");
             }
 
-            if (!args.Quiet && args.Verbose)
-                Console.WriteLine($"OK (translation, {translation.Count} entries): '{fullPath}'");
             return result;
         }
 

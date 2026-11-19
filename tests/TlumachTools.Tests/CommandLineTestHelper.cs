@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace TlumachTools.Tests
@@ -10,13 +10,12 @@ namespace TlumachTools.Tests
     {
         private static readonly string SourceProjectDir = GetSourceProjectDir();
 
-        private static string GetSourceProjectDir()
+        private static string GetSourceProjectDir([CallerFilePath] string thisFile = "")
         {
-            string assemblyDir = Path.GetDirectoryName(
-                typeof(CommandLineTestHelper).GetTypeInfo().Assembly.Location) ?? ".";
-
-            // Navigate from bin folder to TlumachTools source project
-            string sourcePath = Path.Combine(assemblyDir, "..", "..", "..", "..", "src", "TlumachTools");
+            // The test runner of .NET Framework shadow-copies the test assembly into a temporary directory,
+            // so the project of the tool is found from the location of this source file instead (tests/TlumachTools.Tests)
+            string testProjectDir = Path.GetDirectoryName(thisFile) ?? ".";
+            string sourcePath = Path.Combine(testProjectDir, "..", "..", "src", "TlumachTools");
             return Path.GetFullPath(sourcePath);
         }
 
@@ -53,7 +52,8 @@ namespace TlumachTools.Tests
         private static string BuildArguments(string[] args)
         {
             var sb = new StringBuilder();
-            sb.Append($"run --project \"{SourceProjectDir}\"");
+            // The tool targets several frameworks, so "dotnet run" needs one
+            sb.Append($"run --project \"{SourceProjectDir}\" --framework net10.0");
 
             if (args.Length > 0)
             {

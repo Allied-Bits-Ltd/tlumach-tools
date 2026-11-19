@@ -29,7 +29,7 @@ namespace TlumachTools.Tests.Commands
             (int exitCode, string stdout, string stderr) =
                 CommandLineTestHelper.RunTlumachTools("verify", "-in", validPath, "-keeprefs");
 
-            Assert.NotContains("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace TlumachTools.Tests.Commands
             (int exitCode, string stdout, string stderr) =
                 CommandLineTestHelper.RunTlumachTools("verify", "-in", validPath, "-r");
 
-            Assert.NotContains("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace TlumachTools.Tests.Commands
             (int exitCode, string stdout, string stderr) =
                 CommandLineTestHelper.RunTlumachTools("convert", "-in", inputPath, "-out", "INI", "-keeprefs", "-overwrite");
 
-            Assert.NotContains("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -105,7 +105,7 @@ namespace TlumachTools.Tests.Commands
             (int exitCode, string stdout, string stderr) =
                 CommandLineTestHelper.RunTlumachTools("verify", "-in", validPath, "--keeprefs");
 
-            Assert.NotContains("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
         }
 
         private string CreateValidJsonTranslation(string fileName = "test.json")

@@ -32,7 +32,7 @@ namespace TlumachTools.Tests.Commands
                 CommandLineTestHelper.RunTlumachTools(
                     "convert", "-in", targetPath, "-out", "XLIFF", "--source", sourcePath, "-overwrite");
 
-            Assert.NotContains("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace TlumachTools.Tests.Commands
                 CommandLineTestHelper.RunTlumachTools(
                     "convert", "-in", targetPath, "-out", "XLIFF", "-source", sourcePath, "-overwrite");
 
-            Assert.NotContains("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace TlumachTools.Tests.Commands
                 CommandLineTestHelper.RunTlumachTools(
                     "convert", "-in", targetPath, "-out", "XLIFF", $"-source={sourcePath}", "-overwrite");
 
-            Assert.NotContains("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("unrecognized option", stderr, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]

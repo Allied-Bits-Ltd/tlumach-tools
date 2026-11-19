@@ -64,6 +64,108 @@ namespace TlumachTools
         }
 
         /// <summary>
+        /// Loads every translation that a file holds. A CSV or TSV file holds one translation per locale column, and the
+        /// table parsers return a translation only for a requested locale, so each locale named in the first line is loaded;
+        /// a file of another format is loaded once. A locale is <see langword="null"/> for a file with one translation.
+        /// Throws on parse error.
+        /// </summary>
+        public static List<(string? Locale, Translation? Translation)> LoadTranslationsOfAllLocales(string fullPath)
+        {
+            string ext = Path.GetExtension(fullPath).ToLowerInvariant();
+            BaseParser? parser = FileFormats.GetParser(ext);
+            var result = new List<(string? Locale, Translation? Translation)>();
+            if (parser is null)
+                return result;
+
+            string content = File.ReadAllText(fullPath, Encoding.UTF8);
+
+            if (parser is BaseTableParser)
+            {
+                foreach (string locale in TableHeaderReader.ReadLocales(parser, content))
+                {
+                    CultureInfo culture;
+                    try
+                    {
+                        culture = new CultureInfo(locale);
+                    }
+                    catch (CultureNotFoundException)
+                    {
+                        // A caption that is not a culture name (a translation manager never asks for it) is not a locale
+                        continue;
+                    }
+
+                    result.Add((locale, parser.LoadTranslation(content, culture, null)));
+                }
+
+                // Without locale names, the first column with texts is loaded, as for the invariant culture
+                if (result.Count == 0)
+                    result.Add((null, parser.LoadTranslation(content, CultureInfo.InvariantCulture, null)));
+
+                return result;
+            }
+
+            result.Add((null, parser.LoadTranslation(content, null, null)));
+            return result;
+        }
+
+        /// <summary>
+        /// Reads the captions of the locale columns of a CSV or TSV file with the cell reader of the parser itself,
+        /// so that quotes and separators are handled exactly as when the file is loaded.
+        /// </summary>
+        private static class TableHeaderReader
+        {
+            public static List<string> ReadLocales(BaseParser parser, string content)
+            {
+                var cells = new List<string>();
+
+                // Skip empty lines, as the parser does
+                int offset = 0;
+                int lineNumber = 1;
+                while (offset < content.Length && (content[offset] == '\r' || content[offset] == '\n'))
+                {
+                    if (content[offset] == '\n')
+                        lineNumber++;
+                    offset++;
+                }
+
+                if (offset < content.Length)
+                {
+                    if (parser is TsvParser)
+                        new TsvHeader().Read(content, offset, lineNumber, cells);
+                    else
+                        new CsvHeader().Read(content, offset, lineNumber, cells);
+                }
+
+                // The first column holds the keys; the description and comments columns are not locales
+                var locales = new List<string>();
+                for (int i = 1; i < cells.Count; i++)
+                {
+                    string caption = cells[i].Trim();
+                    if (caption.Length == 0
+                        || caption.Equals(BaseTableParser.DescriptionColumnCaption, StringComparison.OrdinalIgnoreCase)
+                        || caption.Equals(BaseTableParser.CommentsColumnCaption, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    locales.Add(caption);
+                }
+
+                return locales;
+            }
+
+            private sealed class CsvHeader : CsvParser
+            {
+                public void Read(string content, int offset, int lineNumber, List<string> buffer) => ReadCells(content, offset, lineNumber, buffer, out _);
+            }
+
+            private sealed class TsvHeader : TsvParser
+            {
+                public void Read(string content, int offset, int lineNumber, List<string> buffer) => ReadCells(content, offset, lineNumber, buffer, out _);
+            }
+        }
+
+        /// <summary>
         /// Creates a TranslationManager from a config file path.
         /// Throws on parse error.
         /// </summary>

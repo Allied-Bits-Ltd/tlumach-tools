@@ -16,6 +16,8 @@ namespace TlumachTools
         public bool Verbose { get; set; }
 
         public char? Separator { get; set; }
+
+        public bool Help { get; set; }
     }
 
     /// <summary>
@@ -178,13 +180,19 @@ namespace TlumachTools
                         result.Separator = sepValues[0][0];
                         break;
 
+                    case "help":
+                    case "h":
+                    case "?":
+                        result.Help = true;
+                        break;
+
                     default:
                         error = $"Unrecognized option '{args[i]}'.";
                         return null;
                 }
             }
 
-            if (result.InputFiles.Count == 0)
+            if (result.InputFiles.Count == 0 && !result.Help)
             {
                 error = "The -in option is required.";
                 return null;
