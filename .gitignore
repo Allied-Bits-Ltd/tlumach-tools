@@ -62,4 +62,15 @@ nunit-*.xml
 # CodeRush cache/options directories
 .cr/
 
-.clause/worktrees/
+# mtime-based, breaks after git clone (git does not support comments after a pattern, so they are on their own lines)
+graphify-out/manifest.json
+# local only
+graphify-out/cost.json
+# graphify-out/cache/ is optional: commit it for speed, or skip it to keep the repository small
+/graphify-out/
+/.code-review-graph/
+.claude/worktrees/
+# Settings of AI coding tools are local (CLAUDE.md is kept in the repository)
+/.claude/
+/.mcp.json
+/.superpowers/
