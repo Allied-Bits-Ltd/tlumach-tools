@@ -92,12 +92,15 @@ namespace TlumachTools.Tests.Integration
 
         private string CreateValidIniConfig()
         {
-            string path = Path.Combine(_tempDir, "ini_config.inicfg");
-            string content = @"[Config]
-defaultFile=strings.ini
+            // ".cfg" is the extension of INI configurations; ".inicfg" is not a configuration extension of Tlumach
+            string path = Path.Combine(_tempDir, "ini_config.cfg");
+            string content = @"defaultFile=strings.ini
 delayedUnitsCreation=false
 ";
             File.WriteAllText(path, content);
+
+            // The validation of a configuration loads its default file
+            File.WriteAllText(Path.Combine(_tempDir, "strings.ini"), "greeting=Hello\n");
             return path;
         }
 
@@ -115,7 +118,7 @@ welcome=Welcome
 
         private string CreateInvalidIniConfig()
         {
-            string path = Path.Combine(_tempDir, "invalid_config.inicfg");
+            string path = Path.Combine(_tempDir, "invalid_config.cfg");
             string content = @"[Config
 defaultFile=strings.ini
 ";

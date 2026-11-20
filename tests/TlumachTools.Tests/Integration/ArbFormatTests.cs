@@ -97,6 +97,9 @@ namespace TlumachTools.Tests.Integration
   ""defaultFile"": ""strings.arb""
 }";
             File.WriteAllText(path, content);
+
+            // The validation of a configuration loads its default file
+            File.WriteAllText(Path.Combine(_tempDir, "strings.arb"), "{\n  \"@@locale\": \"en\",\n  \"greeting\": \"Hello\"\n}\n");
             return path;
         }
 

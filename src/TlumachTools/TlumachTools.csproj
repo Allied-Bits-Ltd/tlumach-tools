@@ -29,8 +29,8 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="AlliedBits.Tlumach" Version="2.*" />
-    <PackageReference Include="AlliedBits.Tlumach.Writers" Version="2.*" />
+    <PackageReference Include="AlliedBits.Tlumach" Version="2.1.*" />
+    <PackageReference Include="AlliedBits.Tlumach.Writers" Version="2.1.*" />
   </ItemGroup>
   <Target Name="RemoveUnwantedTlumachAssets" AfterTargets="ResolveAssemblyReferences" Condition="'$(TargetFramework)' == 'net10.0'">
     <ItemGroup>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Tlumach;
 using Tlumach.Base;
+using Tlumach.Validation;
 
 namespace TlumachTools.Commands
 {
@@ -92,7 +93,7 @@ namespace TlumachTools.Commands
                 switch (file.Kind)
                 {
                     case FileKind.Config:
-                        return VerifyConfig(file.FullPath, keepRefs, args);
+                        return VerifyConfig(file.FullPath, args);
 
                     case FileKind.Translation:
                         return VerifyTranslation(file.FullPath, keepRefs, args);
@@ -135,13 +136,49 @@ namespace TlumachTools.Commands
             }
         }
 
-        private static int VerifyConfig(string fullPath, bool keepRefs, VerifyArgs args)
+        private static int VerifyConfig(string fullPath, VerifyArgs args)
         {
-            using TranslationManager manager = FileHelper.LoadConfigFile(fullPath);
-            if (!args.Quiet && args.Verbose)
-                Console.WriteLine($"OK (configuration): '{fullPath}'");
+            // A configuration that cannot be loaded is reported with the error of the translation manager
+            using (FileHelper.LoadConfigFile(fullPath))
+            {
+            }
 
-            return 0;
+            // The validation of Tlumach checks the default file and every translation file that the translation manager would load for the configuration
+            ConfigurationValidationReport report = TranslationValidator.ValidateConfiguration(fullPath, isGeneratorInput: false, projectDirectory: Path.GetDirectoryName(fullPath) ?? string.Empty);
+
+            // The validator ignores a file that is not a Tlumach configuration, i.e. one without a default file
+            if (report.Files.Count == 0 && report.Messages.Count == 0)
+            {
+                if (!args.Quiet)
+                    Console.Error.WriteLine($"The configuration '{fullPath}' does not name the default translation file in the '{TranslationConfiguration.KEY_DEFAULT_FILE}' setting.");
+                return 1;
+            }
+
+            if (!args.Quiet)
+            {
+                foreach (ValidationMessage message in report.Messages)
+                {
+                    if (message.Severity != ValidationSeverity.Info)
+                        Console.Error.WriteLine(message.ToString());
+                    else
+                    if (args.Verbose)
+                        Console.WriteLine(message.ToString());
+                }
+
+                if (args.Verbose)
+                {
+                    foreach (ValidatedFile file in report.Files)
+                    {
+                        string locales = file.CheckedLocales.Count > 1 ? $"the locales {string.Join(", ", file.CheckedLocales)}" : $"the locale '{(file.Locale.Length == 0 ? "default" : file.Locale)}'";
+                        string status = file.ErrorCount > 0 ? "FAILED" : "OK";
+                        Console.WriteLine($"{status} (translation for {locales}, {ValidationReportWriter.Plural(file.EntryCount, "entry", "entries")}): '{file.FilePath}'");
+                    }
+
+                    Console.WriteLine($"{(report.ErrorCount > 0 ? "FAILED" : "OK")} (configuration, {ValidationReportWriter.Plural(report.Files.Count, "translation file")}, {ValidationReportWriter.Plural(report.ErrorCount, "error")}, {ValidationReportWriter.Plural(report.WarningCount, "warning")}): '{fullPath}'");
+                }
+            }
+
+            return report.ErrorCount > 0 ? 1 : 0;
         }
 
         private static int VerifyTranslation(string fullPath, bool keepRefs, VerifyArgs args)

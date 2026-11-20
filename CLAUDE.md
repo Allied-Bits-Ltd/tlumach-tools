@@ -50,6 +50,7 @@ dotnet test tests/TlumachTools.Tests/TlumachTools.Tests.csproj -v detailed
   - Parses verify arguments via ArgParser.ParseVerify()
   - Iterates through input files, classifying each as Config or Translation
   - Handles file existence, parsing errors, and file reference validation
+  - Validates a configuration with `TranslationValidator.ValidateConfiguration` (namespace `Tlumach.Validation` of the `AlliedBits.Tlumach` package, 2.1 or newer), the shared validation of Tlumach.NET that the IDE extensions also use; errors give exit code 1, warnings are printed only, informational messages only with `-verbose`. A translation file given alone is loaded per locale by `FileHelper.LoadTranslationsOfAllLocales`, because Tlumach.NET has no public API to validate a single translation file
   - Returns appropriate exit codes (0=success, 1=error, 2=file not found, 87=invalid args)
 
 - **Commands/ConvertCommand.cs** - Implements `convert` command logic:

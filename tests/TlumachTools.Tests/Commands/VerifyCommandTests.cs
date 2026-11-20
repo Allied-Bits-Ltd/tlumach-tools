@@ -146,6 +146,100 @@ namespace TlumachTools.Tests.Commands
             Assert.NotEmpty(stdout);
         }
 
+        [Fact]
+        public void VerifyConfigChecksTheTranslationFilesFoundByName()
+        {
+            // The translation manager would load strings_de.json for German, so the validation checks it
+            string configPath = CreateValidJsonConfig();
+            string german = Path.Combine(_tempDir, "strings_de.json");
+            File.WriteAllText(german, "{\n  \"greeting\": \"Hallo\"\n  \"farewell\": \"Tschüss\"\n}\n");
+
+            (int exitCode, string stdout, string stderr) =
+                CommandLineTestHelper.RunTlumachTools("verify", "-in", configPath);
+
+            Assert.Equal(1, exitCode);
+            Assert.Contains(german, stderr);
+            Assert.Contains("TLUMACHVAL005", stderr);
+        }
+
+        [Fact]
+        public void VerifyConfigReportsBrokenTemplates()
+        {
+            // The ICU plural of the German text lacks the required "other" branch, which only formatting the text finds
+            string configPath = Path.Combine(_tempDir, "arb_mode.jsoncfg");
+            File.WriteAllText(configPath, "{\n  \"defaultFile\": \"strings.json\",\n  \"textProcessingMode\": \"Arb\"\n}\n");
+            File.WriteAllText(Path.Combine(_tempDir, "strings.json"), "{\n  \"greeting\": \"{count, plural, one {# item} other {# items}}\"\n}\n");
+            File.WriteAllText(Path.Combine(_tempDir, "strings_de.json"), "{\n  \"greeting\": \"{count, plural, one {# Artikel}}\"\n}\n");
+
+            (int exitCode, string stdout, string stderr) =
+                CommandLineTestHelper.RunTlumachTools("verify", "-in", configPath);
+
+            Assert.Equal(1, exitCode);
+            Assert.Contains("TLUMACHVAL006", stderr);
+            Assert.Contains("greeting", stderr);
+        }
+
+        [Fact]
+        public void VerifyConfigWithMissingDefaultFileReturnsExit1()
+        {
+            string path = Path.Combine(_tempDir, "no_default.jsoncfg");
+            File.WriteAllText(path, "{\n  \"defaultFile\": \"absent.json\"\n}\n");
+
+            (int exitCode, string stdout, string stderr) =
+                CommandLineTestHelper.RunTlumachTools("verify", "-in", path);
+
+            Assert.Equal(1, exitCode);
+            Assert.Contains("TLUMACHVAL002", stderr);
+            Assert.Contains("absent.json", stderr);
+        }
+
+        [Fact]
+        public void VerifyConfigWithMissingSecondaryFileWarnsAndReturnsExit0()
+        {
+            // The translation manager shows the texts of the default file instead of a missing translation, so it is a warning
+            string path = Path.Combine(_tempDir, "with_translations.jsoncfg");
+            File.WriteAllText(path, "{\n  \"defaultFile\": \"strings.json\",\n  \"translations\": { \"fr\": \"strings_fr.json\" }\n}\n");
+            CreateDefaultJsonTranslation();
+
+            (int exitCode, string stdout, string stderr) =
+                CommandLineTestHelper.RunTlumachTools("verify", "-in", path);
+
+            Assert.Equal(0, exitCode);
+            Assert.Contains("warning TLUMACHVAL004", stderr);
+        }
+
+        [Fact]
+        public void VerifyConfigVerboseListsTheCheckedFilesAndMissingKeys()
+        {
+            string configPath = CreateValidJsonConfig();
+            File.WriteAllText(Path.Combine(_tempDir, "strings_de.json"), "{\n  \"other\": \"Andere\"\n}\n");
+
+            (int exitCode, string stdout, string stderr) =
+                CommandLineTestHelper.RunTlumachTools("verify", "-in", configPath, "-verbose");
+
+            Assert.Equal(0, exitCode);
+            Assert.Empty(stderr);
+
+            // The keys that the translation lacks or adds are informational messages, shown only with -verbose
+            Assert.Contains("TLUMACHVAL007", stdout);
+            Assert.Contains("TLUMACHVAL012", stdout);
+            Assert.Contains("strings_de.json", stdout);
+            Assert.Contains("OK (configuration, 2 translation files", stdout);
+        }
+
+        [Fact]
+        public void VerifyConfigWithoutDefaultFileReturnsExit1()
+        {
+            string path = Path.Combine(_tempDir, "empty.jsoncfg");
+            File.WriteAllText(path, "{\n  \"textProcessingMode\": \"DotNet\"\n}\n");
+
+            (int exitCode, string stdout, string stderr) =
+                CommandLineTestHelper.RunTlumachTools("verify", "-in", path);
+
+            Assert.Equal(1, exitCode);
+            Assert.NotEmpty(stderr);
+        }
+
         private string CreateValidJsonConfig()
         {
             string path = Path.Combine(_tempDir, "valid_config.jsoncfg");
@@ -153,7 +247,13 @@ namespace TlumachTools.Tests.Commands
   ""defaultFile"": ""strings.json""
 }";
             File.WriteAllText(path, content);
+            CreateDefaultJsonTranslation();
             return path;
+        }
+
+        private void CreateDefaultJsonTranslation()
+        {
+            File.WriteAllText(Path.Combine(_tempDir, "strings.json"), "{\n  \"greeting\": \"Hello\"\n}\n");
         }
 
         private string CreateValidJsonTranslation()
@@ -195,6 +295,7 @@ namespace TlumachTools.Tests.Commands
             string path = Path.Combine(_tempDir, "valid.tomlcfg");
             string content = @"defaultFile = ""strings.toml""";
             File.WriteAllText(path, content);
+            File.WriteAllText(Path.Combine(_tempDir, "strings.toml"), "greeting = \"Hello\"\n");
             return path;
         }
     }

@@ -97,6 +97,9 @@ delayedUnitsCreation = false
 onlyDeclareKeys = false
 ";
             File.WriteAllText(path, content);
+
+            // The validation of a configuration loads its default file
+            File.WriteAllText(Path.Combine(_tempDir, "strings.toml"), "greeting = \"Hello\"\n");
             return path;
         }
 

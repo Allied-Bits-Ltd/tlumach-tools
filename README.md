@@ -69,6 +69,16 @@ All prefix styles are equivalent and can be mixed in a single command.
 
 Verify that one or more files can be loaded without errors.
 
+A **configuration file** is checked with the validation of Tlumach (`TranslationValidator` of the `AlliedBits.Tlumach` package), which the **Validate Translations** command of the Tlumach extensions for Visual Studio and VS Code also uses. The tool loads the configuration and checks every translation file that the translation manager would load for it: the default file, the files named in the `translations` section, and the files found by name next to the default file (for example, `Strings_de.json` for `Strings.json`), with every locale of a CSV, TSV, XLIFF, or String Catalog file. Every text with placeholders is formatted once, so errors in templates are found too. The problems are printed the way compilers print them (`path(line,column): error TLUMACHVAL005: ...`):
+
+- **errors** (the default file is missing or cannot be parsed, a translation file cannot be parsed, a template is invalid) are printed and make the tool exit with `1`;
+- **warnings** (for example, a file named in the `translations` section does not exist, so the texts of the default file are shown instead) are printed, but do not change the exit code;
+- **informational messages** (keys that a translation lacks or adds) are printed only with `-verbose`.
+
+The codes are described in the [validation article](https://github.com/Allied-Bits-Ltd/tlumach-net/blob/main/docs/articles/validation.md) of Tlumach.NET.
+
+A **translation file** is loaded with the parser of its extension; every locale of a CSV or TSV file is loaded.
+
 **Syntax:**
 ```
 tlumach verify -in <file> [file ...] [options]
@@ -86,8 +96,8 @@ tlumach verify -in <file> [file ...] [options]
 
 **Exit Codes:**
 
-- `0` - All files verified successfully
-- `1` - Parse error or validation failure in one or more files
+- `0` - All files verified successfully (warnings do not count as failures)
+- `1` - Parse error or validation error in one or more files
 - `2` - One or more input files not found
 - `87` -  One or more aguments to the tool are not valid
 
