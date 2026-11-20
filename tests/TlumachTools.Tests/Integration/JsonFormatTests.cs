@@ -147,6 +147,9 @@ namespace TlumachTools.Tests.Integration
   ""textProcessingMode"": ""DotNet""
 }";
             File.WriteAllText(path, content);
+
+            // verify validates the configuration, which requires the default file to exist
+            CreateValidJsonTranslation("strings.json");
             return path;
         }
 

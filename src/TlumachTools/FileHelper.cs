@@ -211,6 +211,30 @@ namespace TlumachTools
         }
 
         /// <summary>
+        /// Creates a translation manager whose default translation is <paramref name="sourcePath"/> and whose translation for <paramref name="targetCulture"/> is <paramref name="targetPath"/>,
+        /// as the XLIFF writer needs them: the source texts come from the default translation and the target texts from the translation of the target culture.
+        /// </summary>
+        public static TranslationManager CreateManagerForXliffBitext(string sourcePath, string targetPath, CultureInfo targetCulture)
+        {
+            string ext = Path.GetExtension(sourcePath).ToLowerInvariant();
+
+            var config = new TranslationConfiguration(
+                assembly: null,
+                defaultFile: Path.GetFileName(sourcePath),
+                defaultFileLocale: null,
+                textProcessingMode: GetTextFormatForExtension(ext));
+
+            // A full path is used as is, so the target file can be in another directory than the source file
+            config.Translations[targetCulture.Name] = targetPath;
+
+            return new TranslationManager(config)
+            {
+                LoadFromDisk = true,
+                TranslationsDirectory = Path.GetDirectoryName(sourcePath) ?? ".",
+            };
+        }
+
+        /// <summary>
         /// Tries to determine the culture embedded in a translation filename (e.g., "strings.de-DE.json" → de-DE).
         /// Returns null if no culture suffix is found (i.e., this is the default/invariant translation file).
         /// </summary>
@@ -315,6 +339,14 @@ namespace TlumachTools
                 string sourceFile = explicitSources[0];
                 string sourceFullPath = Resolve(sourceFile);
 
+                // A relative path that is not found in the current directory is looked up next to the target file
+                if (!File.Exists(sourceFullPath) && !Path.IsPathRooted(sourceFile))
+                {
+                    string besideTarget = Path.GetFullPath(Path.Combine(targetDir, sourceFile));
+                    if (File.Exists(besideTarget))
+                        sourceFullPath = besideTarget;
+                }
+
                 if (!File.Exists(sourceFullPath))
                 {
                     error = $"Source file specified with -source not found: '{sourceFile}'";
@@ -362,8 +394,14 @@ namespace TlumachTools
             if (cultures.Count == 0)
                 return string.Empty;
 
-            string baseNameWithoutLocale = nameWithoutExt.Substring(0,
-                nameWithoutExt.Length - cultures[0].Name.Length - 1);
+            // The culture that ListCultures returns can differ from the suffix (a neutral "de" becomes "de-DE"),
+            // so the suffix is cut at the locale separator of the format, as ListCultures finds it
+            char separator = FileFormats.GetParser(ext.ToLowerInvariant(), true)?.GetLocaleSeparatorChar() ?? '_';
+            int idx = nameWithoutExt.LastIndexOf(separator);
+            if (idx <= 0)
+                return string.Empty;
+
+            string baseNameWithoutLocale = nameWithoutExt.Substring(0, idx);
 
             string guessedSourcePath = Path.Combine(directory, baseNameWithoutLocale + ext);
             if (File.Exists(guessedSourcePath) && Classify(guessedSourcePath, out _) is not null)

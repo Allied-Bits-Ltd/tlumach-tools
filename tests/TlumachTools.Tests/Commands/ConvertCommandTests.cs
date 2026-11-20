@@ -112,8 +112,10 @@ namespace TlumachTools.Tests.Commands
             (int exitCode, string stdout, string stderr) =
                 CommandLineTestHelper.RunTlumachTools("convert", "-in", inputTranslation, "-out", "INI", "--quiet");
 
+            // --quiet suppresses all output, including errors, so only the exit code tells that the file was skipped
             Assert.Equal(1, exitCode);
-            Assert.Contains("output_strings.ini", stderr);
+            Assert.Empty(stderr);
+            Assert.Equal("original content", File.ReadAllText(outputPath));
         }
 
         [Fact]

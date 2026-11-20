@@ -235,7 +235,7 @@ When converting to XLIFF format, Tlumach Tools requires:
 
 The tool uses a three-tier strategy to locate the source file:
 
-1. **Explicit specification** (tier 1): Use the `-source` parameter if provided
+1. **Explicit specification** (tier 1): Use the `-source` parameter if provided; a relative path that is not found in the current directory is looked up next to the input file
 2. **Configuration default** (tier 2): Use the `defaultFile` from the configuration file
 3. **Naming convention** (tier 3): Strip the locale suffix from the target filename to find the source
 

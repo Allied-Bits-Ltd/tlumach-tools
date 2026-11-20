@@ -86,7 +86,7 @@ namespace TlumachTools.Tests.Commands
         public void ConvertWithKeepRefsPreservesFileReferences()
         {
             string inputPath = CreateValidJsonTranslation();
-            string outputPath = Path.Combine(_tempDir, "output.ini");
+            string outputPath = Path.Combine(_tempDir, "test.ini");
 
             // Convert with -keeprefs should succeed
             (int exitCode, string stdout, string stderr) =

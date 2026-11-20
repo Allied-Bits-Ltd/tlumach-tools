@@ -585,28 +585,18 @@ namespace TlumachTools.Commands
                 return 1;
             }
 
-            TranslationManager? manager = null;
-
-            try
-            {
-                manager = FileHelper.CreateManagerForTranslationFile(translationFile.FullPath);
-            }
-            catch (TextParseException ex)
+            // Determine target culture from filename
+            CultureInfo? targetCulture = FileHelper.GetCultureFromFileName(translationFile.FullPath);
+            if (targetCulture is null)
             {
                 if (!args.Quiet)
-                    Console.Error.WriteLine($"File error with '{translationFile.FullPath}' at {ex.LineNumber}:{ex.ColumnNumber} : {ex.Message}");
-
-                return 1;
-            }
-            catch (Exception ex)
-            {
-                if (!args.Quiet)
-                    Console.Error.WriteLine($"Error loading '{translationFile.FullPath}': {ex.Message}");
+                    Console.Error.WriteLine($"Cannot determine target culture from filename '{Path.GetFileName(translationFile.FullPath)}'.");
 
                 return 1;
             }
 
-            using (manager)
+            // The source file is the default translation of the manager and the input file is the translation of the target culture
+            using (TranslationManager manager = FileHelper.CreateManagerForXliffBitext(sourceFile, translationFile.FullPath, targetCulture))
             {
                 // Load source as invariant
                 try
@@ -631,16 +621,6 @@ namespace TlumachTools.Commands
                 {
                     if (!args.Quiet)
                         Console.Error.WriteLine($"Error loading source translation '{sourceFile}': {ex.Message}");
-
-                    return 1;
-                }
-
-                // Determine target culture from filename
-                CultureInfo? targetCulture = FileHelper.GetCultureFromFileName(translationFile.FullPath);
-                if (targetCulture is null)
-                {
-                    if (!args.Quiet)
-                        Console.Error.WriteLine($"Cannot determine target culture from filename '{Path.GetFileName(translationFile.FullPath)}'.");
 
                     return 1;
                 }

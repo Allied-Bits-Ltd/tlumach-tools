@@ -161,6 +161,10 @@ namespace TlumachTools.Tests.Integration
             Assert.Contains("<source>", xliffContent);
             Assert.Contains("<target>", xliffContent);
             Assert.Contains("<unit", xliffContent);
+
+            // The texts of the source file are the source and the texts of the input file are the target
+            Assert.Contains("<source>Hello</source>", xliffContent);
+            Assert.Contains("<target>Guten Morgen</target>", xliffContent);
         }
 
         [Fact]

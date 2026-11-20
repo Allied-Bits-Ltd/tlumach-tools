@@ -86,8 +86,10 @@ namespace TlumachTools.Tests.Commands
                 CommandLineTestHelper.RunTlumachTools(
                     "convert", "-in", targetPath, "-out", "XLIFF", "--quiet");
 
+            // --quiet suppresses the error message, but not the failure
             Assert.NotEqual(0, exitCode);
-            Assert.Contains("source", stderr, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(stderr);
+            Assert.False(File.Exists(Path.Combine(_tempDir, "strings_de.xlf")));
         }
 
         [Fact]
